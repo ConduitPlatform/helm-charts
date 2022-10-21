@@ -9,7 +9,7 @@ This chart bootstraps a [Conduit](https://getconduit.dev/) deployment on a [Kube
 ## Get Repo Info
 
 ```console
-helm repo add conduit-platform <LINK-PLACEHOLDER>
+helm repo add conduit-platform https://conduitplatform.github.io/helm-charts/
 helm repo update
 ```
 

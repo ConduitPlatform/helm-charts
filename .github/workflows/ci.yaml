@@ -1,0 +1,10 @@
+name: CI
+
+on: pull_request
+
+jobs:
+  call-lint:
+    uses: ./.github/workflows/linter.yaml
+  call-lint-test:
+    uses: ./.github/workflows/lint-test.yaml
+    
