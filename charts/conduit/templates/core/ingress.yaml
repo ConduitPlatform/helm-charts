@@ -1,0 +1,54 @@
+{{- if .Values.core.ingress.enabled }}
+{{- $extraPaths := .Values.core.ingress.extraPaths -}}
+apiVersion: {{ include "conduit-helm.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "conduit-helm.core.fullname" . }}
+  annotations:
+    {{- with .Values.core.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}  
+spec:
+  {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+  ingressClassName: nginx
+  {{- end }}
+  rules:
+    - host: {{ .Values.core.ingress.hostName }} 
+      http:
+        paths:
+          - path: /realtime
+            {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "conduit-helm.core.fullname" . }}
+                port:
+                  number: {{ .Values.core.service.socket_port }}
+              {{- else }}
+              serviceName: {{ template "conduit-helm.core.fullname" . }}
+              servicePort: {{ .Values.core.service.socket_port }}
+              {{- end }}
+          - path: /
+            {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "conduit-helm.core.fullname" . }}
+                port:
+                  number: {{ .Values.core.service.tcp_port }}
+              {{- else }}
+              serviceName: {{ template "conduit-helm.core.fullname" . }}
+              servicePort: {{ .Values.core.service.tcp_port }}
+              {{- end }}
+          {{ if $extraPaths }}
+          {{ toYaml $extraPaths | indent 10 }}
+          {{- end }}
+  {{- if .Values.core.ingress.tls }}
+  tls:
+    {{- toYaml .Values.core.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

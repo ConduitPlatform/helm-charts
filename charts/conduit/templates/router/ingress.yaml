@@ -1,0 +1,54 @@
+{{- if and .Values.router.enabled .Values.router.ingress.enabled }}
+{{- $extraPaths := .Values.router.ingress.extraPaths -}}
+apiVersion: {{ include "conduit-helm.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "conduit-helm.router.fullname" . }}
+  annotations:
+    {{- with .Values.router.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}  
+spec:
+  {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+  ingressClassName: nginx
+  {{- end }}  
+  rules:
+    - host: {{ .Values.router.ingress.hostName }} 
+      http:
+        paths:
+          - path: /realtime
+            {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "conduit-helm.router.fullname" . }}
+                port:
+                  number: {{ .Values.router.service.socket_port }}
+              {{- else }}  
+              serviceName: {{ template "conduit-helm.router.fullname" . }}
+              servicePort: {{ .Values.router.service.socket_port }}
+              {{- end }}
+          - path: /
+            {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq (include "conduit-helm.ingress.apiVersion" $) "networking.k8s.io/v1" }}
+              service:
+                name: {{ template "conduit-helm.router.fullname" . }}
+                port:
+                  number: {{ .Values.router.service.tcp_port }}
+              {{- else }} 
+              serviceName: {{ template "conduit-helm.router.fullname" . }}
+              servicePort: {{ .Values.router.service.tcp_port }}
+              {{- end }} 
+          {{ if $extraPaths }}
+          {{ toYaml $extraPaths | indent 10 }}
+          {{- end }}
+  {{- if .Values.router.ingress.tls }}
+  tls:
+    {{- toYaml .Values.router.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

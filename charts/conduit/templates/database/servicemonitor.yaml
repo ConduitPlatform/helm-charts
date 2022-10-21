@@ -1,0 +1,49 @@
+{{- $databaseName := include "conduit-helm.database.fullname" . -}}
+{{- if .Values.database.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ default $databaseName .Values.database.metrics.serviceMonitor.name }}
+  {{- if .Values.database.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.database.metrics.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ $databaseName }}
+    release: {{ template "conduit-helm.fullname" . }}
+    {{- with .Values.database.metrics.serviceMonitor.selector }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.database.metrics.serviceMonitor.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+{{ include "conduit-helm.selectorLabels" . | indent 6 }}
+      app: {{ $databaseName }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}  
+  endpoints:
+    - port:  {{ .Values.database.metrics.service.name }}
+      path: /metrics
+      {{- with .Values.database.metrics.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.database.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.database.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.database.metrics.serviceMonitor.scheme }}
+      scheme: {{ . }}
+      {{- end }}
+      {{- with .Values.database.metrics.serviceMonitor.tlsConfig }}
+      tlsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

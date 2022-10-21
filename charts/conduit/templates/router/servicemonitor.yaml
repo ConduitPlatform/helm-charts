@@ -1,0 +1,49 @@
+{{- $routerName := include "conduit-helm.router.fullname" . -}}
+{{- if and .Values.router.enabled .Values.router.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ default $routerName .Values.router.metrics.serviceMonitor.name }}
+  {{- if .Values.router.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.router.metrics.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ $routerName }}
+    release: {{ template "conduit-helm.fullname" . }}
+    {{- with .Values.router.metrics.serviceMonitor.selector }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.router.metrics.serviceMonitor.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+{{ include "conduit-helm.selectorLabels" . | indent 6 }}
+      app: {{ $routerName }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port:  {{ .Values.router.metrics.service.name }}
+      path: /metrics
+      {{- with .Values.router.metrics.serviceMonitor.interval }}
+      interval: {{ . }}
+      {{- end }}
+      {{- with .Values.router.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.router.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.router.metrics.serviceMonitor.scheme }}
+      scheme: {{ . }}
+      {{- end }}
+      {{- with .Values.router.metrics.serviceMonitor.tlsConfig }}
+      tlsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

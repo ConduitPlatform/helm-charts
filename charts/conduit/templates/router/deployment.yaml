@@ -1,0 +1,87 @@
+{{- if .Values.router.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "conduit-helm.router.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- with .Values.router.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}  
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ template "conduit-helm.router.fullname" . }}
+spec:
+  replicas: {{ .Values.router.replicas }}
+  selector:
+    matchLabels:
+{{ include "conduit-helm.selectorLabels" . | indent 6 }}
+      app: {{ template "conduit-helm.router.fullname" . }}
+  template:
+    metadata:
+      labels:
+{{ include "conduit-helm.labels" . | indent 8 }}
+        app: {{ template "conduit-helm.router.fullname" . }}
+      {{- if .Values.router.podLabels }}
+        {{- toYaml .Values.router.podLabels | nindent 8 }}
+      {{- end }}
+      {{- if .Values.router.podAnnotations }}
+      annotations:
+        {{- toYaml .Values.router.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.router.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.router.name }}
+          image: {{ default .Values.global.image.repository .Values.router.image.repository }}/{{ .Values.router.image.name }}:{{ default .Values.global.image.tag .Values.router.image.tag }} 
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.router.image.imagePullPolicy }}
+          command:
+            {{- with .Values.router.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- with .Values.router.resources }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}  
+          ports:
+            - containerPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
+            - containerPort: 3000
+            - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: conduit-cm
+            {{- with .Values.router.envFrom }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: __DEFAULT_HOST_URL
+              value: {{ template "conduit-helm.router.default_host" . }}
+            - name: SERVICE_URL
+              value: {{ template "conduit-helm.router.fullname" . }}:{{ .Values.router.service.grpc_port }}
+            {{- if .Values.global.secret.grpc_enable }}
+            - name: GRPC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: conduit-secret
+                  key: GRPC_KEY
+            {{- end }}  
+            - name: GRPC_PORT
+              value: {{ default .Values.global.config.grpc_port .Values.router.containerPort | quote }}
+            {{- with .Values.router.env }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- with .Values.router.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.router.extraContainers }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- with .Values.router.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

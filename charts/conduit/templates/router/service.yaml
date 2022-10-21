@@ -1,0 +1,47 @@
+{{- if .Values.router.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "conduit-helm.router.fullname" . }}
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ template "conduit-helm.router.fullname" . }}
+  {{- if .Values.router.service.labels }}
+    {{- toYaml .Values.router.service.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.router.service.annotations }}
+  annotations:
+    {{- toYaml .Values.router.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+{{ include "conduit-helm.selectorLabels" . | indent 4 }}
+    app: {{ template "conduit-helm.router.fullname" . }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.router.service.tcp_port }}
+      targetPort: 3000
+      name: tcp
+    - protocol: TCP
+      port: {{ .Values.router.service.grpc_port }}
+      targetPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
+      name: grpc
+      {{- if eq .Values.router.service.type "NodePort" }}
+      nodePort: {{ .Values.router.service.nodePort }}
+      {{- end }}
+    - protocol: TCP
+      port: {{ .Values.router.service.socket_port }}
+      targetPort: 3001
+      name: socket
+{{- if .Values.router.metrics.enabled }}
+    - port: {{ .Values.router.metrics.service.port }}
+      name: {{ .Values.router.metrics.service.name }}
+      targetPort:  {{ .Values.global.config.metrics_port }}
+{{- end }}
+  type: {{ .Values.router.service.type }}
+{{- if eq .Values.router.service.type "LoadBalancer" }}
+{{- if .Values.router.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.router.service.loadBalancerIP | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

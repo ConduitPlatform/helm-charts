@@ -1,0 +1,121 @@
+{{ $moduleSettings := index .Values "module-settings" }}
+{{- range $module, $spec := .Values.install -}}
+{{- $specService := $spec.service -}}
+{{- if $spec.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+  namespace: {{ $.Release.Namespace }}
+  annotations:
+    {{- if $moduleSettings.annotations }}
+      {{- toYaml $moduleSettings.annotations | nindent 4 }}
+    {{- end }}  
+    {{- if $spec.annotations }}
+      {{- toYaml $spec.annotations | nindent 4 }}
+    {{- end }} 
+  labels:
+{{ include "conduit-helm.labels" $ | indent 4 }}
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+spec:
+  replicas: {{ default $moduleSettings.replicas $spec.replicas }}
+  selector:
+    matchLabels:
+{{ include "conduit-helm.selectorLabels" $ | indent 6 }}
+      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+  template:
+    metadata:
+      labels:
+{{ include "conduit-helm.labels" $ | indent 8 }}
+        app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+      {{- if $moduleSettings.podLabels }}
+        {{- toYaml $moduleSettings.podLabels | nindent 8 }}
+      {{- end }}
+      {{- if $spec.podLabels }}
+        {{- toYaml $spec.podLabels | nindent 8 }}
+      {{- end }}
+      annotations:
+      {{- if $moduleSettings.podAnnotations }}
+        {{- toYaml $moduleSettings.podAnnotations | nindent 8 }}
+      {{- end }}
+      {{- if $spec.podAnnotations }}
+        {{- toYaml $spec.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      initContainers:
+      {{- if $moduleSettings.initContainers }}
+        {{- toYaml $moduleSettings.initContainers | nindent 6 }}
+      {{- end }}
+      {{- if $spec.initContainers }}
+        {{- toYaml $spec.initContainers | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ $module }}
+          image: {{ default $.Values.global.image.repository $spec.image.repository }}/{{ $spec.image.name }}:{{ default $.Values.global.image.tag $spec.image.tag }} 
+          imagePullPolicy: {{ default $.Values.global.image.imagePullPolicy $spec.image.imagePullPolicy }}
+          command:
+            {{- if $moduleSettings.extraArgs }}
+              {{- toYaml $moduleSettings.extraArgs | nindent 12 }}
+            {{- end }}
+            {{- if $spec.extraArgs }}
+              {{- toYaml $spec.extraArgs | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if $moduleSettings.resources }}
+              {{- toYaml $moduleSettings.resources | nindent 12 }}
+            {{- end }}  
+            {{- if $spec.resources }}
+              {{- toYaml $spec.resources | nindent 12 }}
+            {{- end }}
+          ports:
+            - containerPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $spec.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: conduit-cm
+            {{- if $moduleSettings.envFrom }}
+              {{- toYaml $moduleSettings.envFrom | nindent 12 }}
+            {{- end }}
+            {{- if $spec.envFrom }}
+              {{- toYaml $spec.envFrom | nindent 12 }}
+            {{- end }}
+          env:
+            - name: SERVICE_URL
+              value: {{ template "conduit-helm.fullname" $ }}-{{ $module }}:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+            {{- if $.Values.global.secret.grpc_enable }}
+            - name: GRPC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: conduit-secret
+                  key: GRPC_KEY
+            {{- end }} 
+            - name: GRPC_PORT
+              value: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.containerPort | quote }} 
+            {{- if $moduleSettings.env }}
+              {{- toYaml $moduleSettings.env | nindent 12 }}
+            {{- end }}
+            {{- if $spec.env }}
+              {{- toYaml $spec.env | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            {{- if $moduleSettings.volumeMounts }}
+              {{- toYaml $moduleSettings.volumeMounts | nindent 12 }}
+            {{- end }}
+            {{- if $spec.volumeMounts }}
+              {{- toYaml $spec.volumeMounts | nindent 12 }}
+            {{- end }}
+        {{- if $moduleSettings.extraContainers }}
+          {{- toYaml $moduleSettings.extraContainers | nindent 8 }}
+        {{- end }}
+        {{- if $spec.extraContainers }}
+          {{- toYaml $spec.extraContainers | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- if $moduleSettings.volumes }}
+          {{- toYaml $moduleSettings.volumes | nindent 8 }}
+        {{- end }}
+        {{- if $spec.volumes }}
+          {{- toYaml $spec.volumes | nindent 8 }}
+        {{- end }}
+{{- end }}
+{{- end }}            

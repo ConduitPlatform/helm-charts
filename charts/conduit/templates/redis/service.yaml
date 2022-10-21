@@ -1,0 +1,25 @@
+{{- if .Values.redis.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "conduit-helm.redis.fullname" . }}
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ template "conduit-helm.redis.fullname" . }}
+  {{- if .Values.redis.service.labels }}
+    {{- toYaml .Values.redis.service.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.redis.service.annotations }}
+  annotations:
+    {{- toYaml .Values.redis.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+{{ include "conduit-helm.selectorLabels" . | indent 4 }}
+    app: {{ template "conduit-helm.redis.fullname" . }}
+  ports:
+    - port: {{ .Values.redis.port }}
+      name: {{ .Values.redis.name }}
+  type: ClusterIP
+{{- end }}
+
