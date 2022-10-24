@@ -275,7 +275,7 @@ admin:
       # kubernetes.io/ingress.class: nginx
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "conduit-helm-admin.local"
 
     # -- Additional ingress paths
     extraPaths: []
@@ -426,7 +426,7 @@ core:
       # kubernetes.io/ingress.class: nginx
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "conduit-helm-admin-api.local"
 
     # -- Additional ingress paths
     extraPaths: []
@@ -691,7 +691,7 @@ router:
       # kubernetes.io/ingress.class: nginx
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "conduit-helm-core.local"
 
     # -- Additional ingress paths
     extraPaths: []
@@ -894,8 +894,11 @@ loki:
   # -- Grafana Agent disabled by default. You may enable it for additional logs
   monitoring:
     selfMonitoring:
+      enabled: false
       grafanaAgent:
         installOperator: false
+      lokiCanary:
+        enabled: false
 
 # -- External Loki section
 externalLoki:
