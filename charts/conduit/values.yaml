@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: latest
+    tag: v0.15.0
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: Always
 
