@@ -8,11 +8,6 @@ on:
         default: ct.yaml
         required: false
         type: string
-      ct_check_version_increment:
-        description: whether to check for version bump requirement
-        default: true
-        required: false
-        type: boolean
       helm_version:
         description: version of the helm binary
         default: v3.8.2
@@ -55,7 +50,7 @@ jobs:
           fi
           
       - name: Run chart-testing (lint)
-        run: ct lint --config "${CT_CONFIGFILE}" --check-version-increment=${{ inputs.ct_check_version_increment }}
+        run: ct lint --config "${CT_CONFIGFILE}"
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
