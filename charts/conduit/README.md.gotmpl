@@ -384,7 +384,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | loki.loki.auth_enabled | bool | `false` | Single tenant deployment needed for loki |
 | loki.loki.commonConfig | object | `{"replication_factor":1}` | The following sections are needed to deploy loki with the bare minimum |
 | loki.loki.server | object | `{"http_listen_port":3100}` | Override for Loki service port |
-| loki.monitoring | object | `{"selfMonitoring":{"grafanaAgent":{"installOperator":false}}}` | Grafana Agent disabled by default. You may enable it for additional logs |
+| loki.monitoring | object | `{"selfMonitoring":{"enabled":false,"grafanaAgent":{"installOperator":false},"lokiCanary":{"enabled":false}}}` | Self Monitoring disabled by default. You may enable it for additional logs |
 
 ## External Loki
 | Key | Type | Default | Description |
