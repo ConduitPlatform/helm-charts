@@ -167,6 +167,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | admin.ingress.annotations | string | `nil` | Additional ingress annotations |
 | admin.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | admin.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| admin.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | admin.ingress.tls | list | `[]` | Ingress TLS configuration |
 | admin.initContainers | list | `[]` | Init containers to add to the admin pod |
 | admin.name | string | `"admin"` | Admin Panel name |
@@ -201,6 +202,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | core.ingress.annotations | string | `nil` | Additional ingress annotations |
 | core.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | core.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| core.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | core.ingress.tls | list | `[]` | Ingress TLS configuration |
 | core.initContainers | list | `[]` | Init containers to add to the core pod |
 | core.metrics.enabled | bool | `true` | Deploy metrics service |
@@ -287,6 +289,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | router.ingress.annotations | string | `nil` | Additional ingress annotations |
 | router.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | router.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| router.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | router.ingress.tls | list | `[]` | Ingress TLS configuration |
 | router.initContainers | list | `[]` | Init containers to add to the router pod |
 | router.metrics.enabled | bool | `true` | Deploy metrics service |
