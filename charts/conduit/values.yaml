@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: latest
+    tag: v0.15.0
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: Always
 
@@ -891,11 +891,14 @@ loki:
     server:
       http_listen_port: 3100
 
-  # -- Grafana Agent disabled by default. You may enable it for additional logs
+  # -- Self Monitoring disabled by default. You may enable it for additional logs
   monitoring:
     selfMonitoring:
+      enabled: false
       grafanaAgent:
         installOperator: false
+      lokiCanary:
+        enabled: false
 
 # -- External Loki section
 externalLoki:
@@ -904,6 +907,17 @@ externalLoki:
 # -- Prometheus dependency configuration
 prometheus:
   setup: true
+
+  # -- Disabling the other Prometheus side modules speeds up the initial setup. It is advised to enable them for future re-deployments.
+
+  alertmanager:
+    enabled: false
+  kubeStateMetrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  pushgateway:
+    enabled: false
 
   # -- Override for Prometheus service port
   server:
