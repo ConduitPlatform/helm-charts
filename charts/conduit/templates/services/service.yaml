@@ -38,13 +38,9 @@ spec:
       port:  {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
       name:  tcp
       targetPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.grpc_port }}
-{{- if and $moduleSettings.metrics.enabled (not $specMetrics.disable) }}
-    - port: {{ $moduleSettings.metrics.service.port }}
-      name: {{ $moduleSettings.metrics.service.name }}
-      targetPort: {{ $.Values.global.config.metrics_port }}
-{{- else if and $spec.metrics.enabled (not $specMetrics.disable) }}
-    - port: {{ $spec.metrics.service.port }}
-      name: {{ $spec.metrics.service.name }}
+{{- if $spec.metrics.enabled }}
+    - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
+      name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
       targetPort: {{ $.Values.global.config.metrics_port }}
 {{- end }}
   type: ClusterIP

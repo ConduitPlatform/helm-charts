@@ -113,7 +113,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 ## Install object
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| install | object | `{"authentication":{"enabled":true,"image":{"name":"authentication"},"metrics":{"disable":false}},"chat":{"enabled":true,"image":{"name":"chat"},"metrics":{"disable":false}},"email":{"enabled":true,"image":{"name":"email"},"metrics":{"disable":false}},"forms":{"enabled":true,"image":{"name":"forms"},"metrics":{"disable":false}},"notification":{"enabled":true,"image":{"name":"push-notifications"},"metrics":{"disable":false}},"sms":{"enabled":true,"image":{"name":"sms"},"metrics":{"disable":false}},"storage":{"enabled":true,"image":{"name":"storage"},"metrics":{"disable":false}}}` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router) |
+| install | object | `{"authentication":{"enabled":true,"image":{"name":"authentication"},"metrics":{"enabled":true}},"chat":{"enabled":true,"image":{"name":"chat"},"metrics":{"enabled":true}},"email":{"enabled":true,"image":{"name":"email"},"metrics":{"enabled":true}},"forms":{"enabled":true,"image":{"name":"forms"},"metrics":{"enabled":true}},"notification":{"enabled":true,"image":{"name":"push-notifications"},"metrics":{"enabled":true}},"sms":{"enabled":true,"image":{"name":"sms"},"metrics":{"enabled":true}},"storage":{"enabled":true,"image":{"name":"storage"},"metrics":{"enabled":true}}}` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router) |
 
 ## Module settings to apply to all services of the install object
 | Key | Type | Default | Description |
@@ -126,7 +126,6 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | module-settings.extraArgs | list | `[]` | Additional command line arguments |
 | module-settings.extraContainers | list | `[]` | Additional containers to be added |
 | module-settings.initContainers | list | `[]` | Init containers |
-| module-settings.metrics.enabled | bool | `true` | Deploy metrics service |
 | module-settings.metrics.service.name | string | `"metrics"` | Metrics service name |
 | module-settings.metrics.service.port | int | `9100` | Metrics service port |
 | module-settings.metrics.service.targetPort | int | `9100` | Metrics service port |
@@ -167,6 +166,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | admin.ingress.annotations | string | `nil` | Additional ingress annotations |
 | admin.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | admin.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| admin.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | admin.ingress.tls | list | `[]` | Ingress TLS configuration |
 | admin.initContainers | list | `[]` | Init containers to add to the admin pod |
 | admin.name | string | `"admin"` | Admin Panel name |
@@ -201,6 +201,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | core.ingress.annotations | string | `nil` | Additional ingress annotations |
 | core.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | core.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| core.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | core.ingress.tls | list | `[]` | Ingress TLS configuration |
 | core.initContainers | list | `[]` | Init containers to add to the core pod |
 | core.metrics.enabled | bool | `true` | Deploy metrics service |
@@ -287,6 +288,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | router.ingress.annotations | string | `nil` | Additional ingress annotations |
 | router.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | router.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
+| router.ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | router.ingress.tls | list | `[]` | Ingress TLS configuration |
 | router.initContainers | list | `[]` | Init containers to add to the router pod |
 | router.metrics.enabled | bool | `true` | Deploy metrics service |

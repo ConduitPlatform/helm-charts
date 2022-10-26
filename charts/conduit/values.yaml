@@ -20,7 +20,7 @@ global:
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
     tag: v0.15.0
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
 
   # -- Configs
   config:
@@ -50,43 +50,43 @@ install:
     image:
       name: authentication
     metrics:
-      disable: false
+      enabled: true
   chat:
     enabled: true
     image:
       name: chat
     metrics:
-      disable: false
+      enabled: true
   email:
     enabled: true
     image:
       name: email
     metrics:
-      disable: false
+      enabled: true
   forms:
     enabled: true
     image:
       name: forms
     metrics:
-      disable: false
+      enabled: true
   notification:
     enabled: true
     image:
       name: push-notifications
     metrics:
-      disable: false
+      enabled: true
   sms:
     enabled: true
     image:
       name: sms
     metrics:
-      disable: false
+      enabled: true
   storage:
     enabled: true
     image:
       name: storage
     metrics:
-      disable: false
+      enabled: false
 
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:
@@ -154,7 +154,6 @@ module-settings:
   # -- Metrics service configuration
   metrics:
     # -- Deploy metrics service
-    enabled: true
     service:
       # -- Metrics service name
       name: metrics
@@ -273,6 +272,9 @@ admin:
     # -- Additional ingress annotations
     annotations:
       # kubernetes.io/ingress.class: nginx
+
+    # -- Defines which ingress controller will implement the resource
+    ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
     hostName: ""
@@ -424,6 +426,9 @@ core:
     # -- Additional ingress annotations
     annotations:
       # kubernetes.io/ingress.class: nginx
+
+    # -- Defines which ingress controller will implement the resource
+    ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
     hostName: ""
@@ -690,6 +695,9 @@ router:
     annotations:
       # kubernetes.io/ingress.class: nginx
 
+    # -- Defines which ingress controller will implement the resource
+    ingressClassName: ""
+
     # -- Hostnames must be provided if Ingress is enabled.
     hostName: ""
 
@@ -927,61 +935,3 @@ prometheus:
 # -- External Prometheus section
 externalPrometheus:
   url: ""
-
-
-# -- Other general auto-generated values
-
-# image:
-#   repository: nginx
-#   pullPolicy: IfNotPresent
-#   # Overrides the image tag whose default is the chart appVersion.
-#   tag: ""
-
-# imagePullSecrets: []
-
-# serviceAccount:
-#   # Specifies whether a service account should be created
-#   create: true
-#   # Annotations to add to the service account
-#   annotations: {}
-#   # The name of the service account to use.
-#   # If not set and create is true, a name is generated using the fullname template
-#   name: ""
-
-# podAnnotations: {}
-
-# podSecurityContext: {}
-#   # fsGroup: 2000
-
-# securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-# resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-# autoscaling:
-#   enabled: false
-#   minReplicas: 1
-#   maxReplicas: 100
-#   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-# nodeSelector: {}
-
-# tolerations: []
-
-# affinity: {}
