@@ -3,16 +3,16 @@
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $specMetrics.service -}}
 {{- $specServiceMonitor := $specMetrics.serviceMonitor -}}
-{{- if and $spec.enabled (not $specMetrics.disable) (or $moduleSettings.metrics.enabled $spec.metrics.enabled)  }}
+{{- if and $spec.enabled $spec.metrics.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ template "conduit-helm.fullname" $ }}-{{ default $module $moduleSettings.metrics.serviceMonitor.name $specServiceMonitor.name }}
-  {{- if $moduleSettings.metrics.serviceMonitor.namespace }}
-  namespace: {{ $moduleSettings.metrics.serviceMonitor.namespace }}
-  {{- else if $specServiceMonitor.namespace }}
+  {{- if $specServiceMonitor.namespace }}
   namespace: {{ $specServiceMonitor.namespace }}
+  {{- else if $moduleSettings.metrics.serviceMonitor.namespace }}
+  namespace: {{ $moduleSettings.metrics.serviceMonitor.namespace}}
   {{- end }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
@@ -41,36 +41,36 @@ spec:
   endpoints:
     - port: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
       path: /metrics
-      {{- if $moduleSettings.metrics.serviceMonitor.interval }}
-      interval: {{ $moduleSettings.metrics.serviceMonitor.interval }}
-      {{- else if $specServiceMonitor.interval }}
+      {{- if $specServiceMonitor.interval }}
       interval: {{ $specServiceMonitor.interval }}
+      {{- else if $moduleSettings.metrics.serviceMonitor.interval }}
+      interval: {{ $moduleSettings.metrics.serviceMonitor.interval }}
       {{- end }}
-      {{- if $moduleSettings.metrics.serviceMonitor.relabelings }}
-      relabelings:
-        {{- toYaml $moduleSettings.metrics.serviceMonitor.relabelings | nindent 8 }}
-      {{- else if $specServiceMonitor.relabelings }}
+      {{- if $specServiceMonitor.relabelings }}
       relabelings:
         {{- toYaml $specServiceMonitor.relabelings | nindent 8 }}
+      {{- else if $moduleSettings.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml $moduleSettings.metrics.serviceMonitor.relabelings | nindent 8 }}
       {{- end }}
-      {{- if $moduleSettings.metrics.serviceMonitor.metricRelabelings }}
-      metricRelabelings:
-        {{- toYaml $moduleSettings.metrics.serviceMonitor.metricRelabelings | nindent 8 }}
-      {{- else if $specServiceMonitor.metricRelabelings }}
+      {{- if $specServiceMonitor.metricRelabelings }}
       metricRelabelings:
         {{- toYaml $specServiceMonitor.metricRelabelings | nindent 8 }}
+      {{- else if $moduleSettings.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml $moduleSettings.metrics.serviceMonitor.metricRelabelings | nindent 8 }}
       {{- end }}
-      {{- if $moduleSettings.metrics.serviceMonitor.scheme }}
-      scheme: {{ $moduleSettings.metrics.serviceMonitor.scheme }}
-      {{- else if $specServiceMonitor.scheme }}
+      {{- if $specServiceMonitor.scheme }}
       scheme: {{ $specServiceMonitor.scheme }}
+      {{- else if $moduleSettings.metrics.serviceMonitor.scheme }}
+      scheme: {{ $moduleSettings.metrics.serviceMonitor.scheme }}
       {{- end }}
-      {{- if $moduleSettings.metrics.serviceMonitor.tlsConfig }}
-      tlsConfig:
-        {{- toYaml $moduleSettings.metrics.serviceMonitor.tlsConfig | nindent 8 }}
-      {{- else if $specServiceMonitor.tlsConfig }}
+      {{- if $specServiceMonitor.tlsConfig  }}
       tlsConfig:
         {{- toYaml $specServiceMonitor.tlsConfig | nindent 8 }}
+      {{- else if $moduleSettings.metrics.serviceMonitor.tlsConfig }}
+      tlsConfig:
+        {{- toYaml $moduleSettings.metrics.serviceMonitor.tlsConfig | nindent 8 }}
       {{- end }}
 {{- end }}
 {{- end }}

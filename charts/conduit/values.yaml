@@ -50,43 +50,43 @@ install:
     image:
       name: authentication
     metrics:
-      disable: false
+      enabled: true
   chat:
     enabled: true
     image:
       name: chat
     metrics:
-      disable: false
+      enabled: true
   email:
     enabled: true
     image:
       name: email
     metrics:
-      disable: false
+      enabled: true
   forms:
     enabled: true
     image:
       name: forms
     metrics:
-      disable: false
+      enabled: true
   notification:
     enabled: true
     image:
       name: push-notifications
     metrics:
-      disable: false
+      enabled: true
   sms:
     enabled: true
     image:
       name: sms
     metrics:
-      disable: false
+      enabled: true
   storage:
     enabled: true
     image:
       name: storage
     metrics:
-      disable: false
+      enabled: false
 
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:
@@ -154,7 +154,6 @@ module-settings:
   # -- Metrics service configuration
   metrics:
     # -- Deploy metrics service
-    enabled: true
     service:
       # -- Metrics service name
       name: metrics

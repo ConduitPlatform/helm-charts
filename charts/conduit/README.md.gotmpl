@@ -113,7 +113,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 ## Install object
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| install | object | `{"authentication":{"enabled":true,"image":{"name":"authentication"},"metrics":{"disable":false}},"chat":{"enabled":true,"image":{"name":"chat"},"metrics":{"disable":false}},"email":{"enabled":true,"image":{"name":"email"},"metrics":{"disable":false}},"forms":{"enabled":true,"image":{"name":"forms"},"metrics":{"disable":false}},"notification":{"enabled":true,"image":{"name":"push-notifications"},"metrics":{"disable":false}},"sms":{"enabled":true,"image":{"name":"sms"},"metrics":{"disable":false}},"storage":{"enabled":true,"image":{"name":"storage"},"metrics":{"disable":false}}}` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router) |
+| install | object | `{"authentication":{"enabled":true,"image":{"name":"authentication"},"metrics":{"enabled":true}},"chat":{"enabled":true,"image":{"name":"chat"},"metrics":{"enabled":true}},"email":{"enabled":true,"image":{"name":"email"},"metrics":{"enabled":true}},"forms":{"enabled":true,"image":{"name":"forms"},"metrics":{"enabled":true}},"notification":{"enabled":true,"image":{"name":"push-notifications"},"metrics":{"enabled":true}},"sms":{"enabled":true,"image":{"name":"sms"},"metrics":{"enabled":true}},"storage":{"enabled":true,"image":{"name":"storage"},"metrics":{"enabled":true}}}` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router) |
 
 ## Module settings to apply to all services of the install object
 | Key | Type | Default | Description |
@@ -126,7 +126,6 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | module-settings.extraArgs | list | `[]` | Additional command line arguments |
 | module-settings.extraContainers | list | `[]` | Additional containers to be added |
 | module-settings.initContainers | list | `[]` | Init containers |
-| module-settings.metrics.enabled | bool | `true` | Deploy metrics service |
 | module-settings.metrics.service.name | string | `"metrics"` | Metrics service name |
 | module-settings.metrics.service.port | int | `9100` | Metrics service port |
 | module-settings.metrics.service.targetPort | int | `9100` | Metrics service port |
