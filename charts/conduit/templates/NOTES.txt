@@ -1,8 +1,9 @@
 Conduit JS Helm chart has been deployed.
 
-You may access Conduit through the Admin panel by setting .Values.admin.enabled to true.
+You may access Conduit through the Admin panel by setting .Values.admin.enabled to true. To expose the service you may use port forwarding:
+kubectl port-forward svc/conduit-admin 8000:80
 
-To expose the service, Ingress method is preferred, but there are options for NodePort and LoadBalancer configurations aswell.
+For more advanced options, there is also support for Ingress as well as NodePort and LoadBalancer configurations.
 
 After reaching the UI the first time you can login with username: admin and password: admin. 
 
