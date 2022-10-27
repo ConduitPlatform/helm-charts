@@ -57,7 +57,13 @@ helm show values [RELEASE_NAME]
 
 You may access Conduit through the Admin panel by setting .Values.admin.enabled to true.
 
-To expose the service, Ingress method is preferred, but there are options for NodePort and LoadBalancer configurations aswell.
+To expose the service you may use port forwarding:
+
+```console
+kubectl port-forward svc/conduit-admin 8000:80
+```
+
+For more advanced options, there is also support for Ingress as well as NodePort and LoadBalancer configurations.
 
 After reaching the UI the first time you can login with username: admin and password: admin. 
 
@@ -162,7 +168,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | admin.image.name | string | `"conduit-ui"` | Image name |
 | admin.image.repository | string | `""` | Intended images are from Dockerhub registry. Reminder: use tag latest for them. |
 | admin.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Admin Panel image |
-| admin.ingress | object | `{"annotations":null,"enabled":true,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Admin Panel |
+| admin.ingress | object | `{"annotations":null,"enabled":false,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Admin Panel |
 | admin.ingress.annotations | string | `nil` | Additional ingress annotations |
 | admin.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | admin.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
@@ -197,7 +203,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | core.image.name | string | `"conduit"` | Image name |
 | core.image.repository | string | `""` | Intended images are from Dockerhub registry. Reminder: use tag latest for them. |
 | core.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Core image |
-| core.ingress | object | `{"annotations":null,"enabled":true,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Core |
+| core.ingress | object | `{"annotations":null,"enabled":false,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Core |
 | core.ingress.annotations | string | `nil` | Additional ingress annotations |
 | core.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | core.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |
@@ -284,7 +290,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 | router.image.name | string | `"router"` | Image name |
 | router.image.repository | string | `""` | Intended images are from Dockerhub registry. Reminder: use tag latest for them. |
 | router.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Router image |
-| router.ingress | object | `{"annotations":null,"enabled":true,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Router |
+| router.ingress | object | `{"annotations":null,"enabled":false,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Router |
 | router.ingress.annotations | string | `nil` | Additional ingress annotations |
 | router.ingress.extraPaths | list | `[]` | Additional ingress paths |
 | router.ingress.hostName | string | `""` | Hostnames must be provided if Ingress is enabled. |

@@ -208,7 +208,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: ""
+    tag: v0.15.0
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -267,7 +267,7 @@ admin:
 
   # -- Enable an ingress resource for the Admin Panel
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
@@ -421,7 +421,7 @@ core:
 
   # -- Enable an ingress resource for the Core
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
@@ -689,7 +689,7 @@ router:
 
   # -- Enable an ingress resource for the Router
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
