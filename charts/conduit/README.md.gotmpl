@@ -93,6 +93,18 @@ a) Prometheus chart dependency. Set `.Values.prometheus.setup` to `true`, for th
 
 b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this option.
 
+## Custom Resource Definition
+
+By default this chart will install the Custom Resource Definition for Prometheus Service Monitors, located in crds/crd-servicemonitor.yaml.
+
+The file is provided by: https://github.com/grafana/helm-charts/blob/main/charts/agent-operator/crds/monitoring.coreos.com_servicemonitors.yaml
+
+This CRD is necessary if you want to use Prometheus and Service Monitors.
+
+If you want to skip the deployment of this CRD, you may use the flag: `--skip-crds`
+
+This CRD is also provided by default if you choose to deploy the Loki chart dependency.
+
 ## Values
 
 ## General
