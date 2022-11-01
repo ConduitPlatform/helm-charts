@@ -86,7 +86,7 @@ install:
     image:
       name: storage
     metrics:
-      enabled: false
+      enabled: true
 
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:
