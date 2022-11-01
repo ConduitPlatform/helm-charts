@@ -3,7 +3,9 @@ kind: ConfigMap
 metadata:
   name: conduit-admin-cm
 data:
+  {{- if .Values.core.ingress.enabled }}
   CONDUIT_API: {{ template "conduit-helm.conduit.api" . }}
+  {{- end }}
   CONDUIT_URL: {{ template "conduit-helm.conduit.url" . }}
   {{- if or .Values.prometheus.setup .Values.externalPrometheus.url }}
   PROMETHEUS_URL: {{ template "conduit-helm.prometheus.url" . }}
