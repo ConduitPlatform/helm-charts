@@ -157,7 +157,14 @@ Create Master Key secret, by either auto-generating one or using one from Values
 {{- if .Values.global.secret.MASTER_KEY -}}
 {{- printf "%s" .Values.global.secret.MASTER_KEY -}}
 {{- else -}}
-{{- randAlphaNum 32 | b64enc -}}
+{{- $existingSecret := lookup "v1" "Secret" .Release.Namespace "conduit-secret" }}
+{{- if $existingSecret -}}
+{{- $master_key := $existingSecret.data.MASTER_KEY }}
+{{- printf "%s" $master_key -}}
+{{- else -}}
+{{- $master_key := randAlphaNum 32 | b64enc }}
+{{- printf "%s" $master_key -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -168,7 +175,14 @@ Create GRPC Key secret, by either auto-generating one or using one from Values.
 {{- if and .Values.global.secret.grpc_enable .Values.global.secret.GRPC_KEY -}}
 {{- printf "%s" .Values.global.secret.GRPC_KEY -}}
 {{- else if and .Values.global.secret.grpc_enable (not .Values.global.secret.GRPC_KEY) -}}
-{{- randAlphaNum 32 | b64enc -}}
+{{- $existingSecret := lookup "v1" "Secret" .Release.Namespace "conduit-secret" }}
+{{- if $existingSecret -}}
+{{- $grpc_key := $existingSecret.data.GRPC_KEY }}
+{{- printf "%s" $grpc_key -}}
+{{- else -}}
+{{- $grpc_key := randAlphaNum 32 | b64enc }}
+{{- printf "%s" $grpc_key -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 

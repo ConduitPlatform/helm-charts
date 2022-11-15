@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: v0.15.0
+    tag: v0.15.3
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: IfNotPresent
 
@@ -208,7 +208,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: v0.15.0
+    tag: v0.15.1
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -298,7 +298,7 @@ admin:
     tls: []
       # - hosts:
       #     - conduit-helm-admin.dev.quintessential.gr
-      #   secretName: conduit-admin-tls
+      #   secretName: conduit-helm-admin-tls
 
 # -- Core module
 core:
@@ -452,7 +452,7 @@ core:
     tls: []
       # - hosts:
       #     - conduit-helm-admin-api.dev.quintessential.gr
-      #   secretName: conduit-conduit-admin-api-tls
+      #   secretName: conduit-helm-admin-api-tls
 
   # -- Alternative option for the host URL if ingress host is not defined.
   hostName: ""
@@ -720,7 +720,7 @@ router:
     tls: []
       # - hosts:
       #     - conduit-helm-core.dev.quintessential.gr
-      #   secretName: conduit-core-tls
+      #   secretName: conduit-helm-core-tls
 
   # -- Alternative option for the host URL if ingress host is not defined.
   hostName: ""
