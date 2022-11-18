@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: v0.15.3
+    tag: v0.15.5
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: IfNotPresent
 
@@ -208,7 +208,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: v0.15.1
+    tag: v0.15.2
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -854,7 +854,7 @@ mongodb:
   env: []
 
   # -- Additional volumeMounts to the mongodb main container
-  volumeMounts: 
+  volumeMounts:
     - name: persistent-storage
       mountPath: /storage
 
