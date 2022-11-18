@@ -854,12 +854,15 @@ mongodb:
   env: []
 
   # -- Additional volumeMounts to the mongodb main container
-  volumeMounts: []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: 
+    - name: persistent-storage
+      mountPath: /storage
 
   # -- Additional volumes to the mongodb pod
-  volumes: []
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: mongo-pv-claim
 
   # -- Mongo service configuration
   service:

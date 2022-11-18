@@ -1,0 +1,14 @@
+{{- range $volume := .Values.mongodb.volumes -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $volume.persistentVolumeClaim.claimName }}
+  labels:
+    app: {{ $volume.persistentVolumeClaim.claimName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+{{- end }}     
