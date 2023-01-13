@@ -55,6 +55,8 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
+            - name: CONDUIT_NAMESPACE
+              value: {{ .Release.Namespace }}
             - name: MASTER_KEY
               valueFrom:
                 secretKeyRef:
