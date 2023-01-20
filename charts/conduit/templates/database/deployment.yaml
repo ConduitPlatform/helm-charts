@@ -58,6 +58,8 @@ spec:
           env:
             - name: SERVICE_URL
               value: {{ template "conduit-helm.database.fullname" . }}:{{ .Values.database.service.tcp_port }}
+            - name: CONDUIT_NAMESPACE
+              value: {{ .Release.Namespace }}
             {{- if .Values.global.secret.grpc_enable }}
             - name: GRPC_KEY
               valueFrom:

@@ -61,6 +61,8 @@ spec:
               value: {{ template "conduit-helm.router.default_host" . }}
             - name: SERVICE_URL
               value: {{ template "conduit-helm.router.fullname" . }}:{{ .Values.router.service.grpc_port }}
+            - name: CONDUIT_NAMESPACE
+              value: {{ .Release.Namespace }}
             {{- if .Values.global.secret.grpc_enable }}
             - name: GRPC_KEY
               valueFrom:

@@ -61,6 +61,8 @@ spec:
           env:
             - name: __DEFAULT_HOST_URL
               value: {{ template "conduit-helm.core.default_host" . }}
+            - name: CONDUIT_NAMESPACE
+              value: {{ .Release.Namespace }}
             {{- if .Values.redis.enabled }}
             - name: REDIS_HOST
               value: {{ template "conduit-helm.redis.fullname" . }}

@@ -82,6 +82,8 @@ spec:
           env:
             - name: SERVICE_URL
               value: {{ template "conduit-helm.fullname" $ }}-{{ $module }}:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+            - name: CONDUIT_NAMESPACE
+              value: {{ $.Release.Namespace }}
             {{- if $.Values.global.secret.grpc_enable }}
             - name: GRPC_KEY
               valueFrom:
