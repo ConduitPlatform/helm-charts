@@ -125,21 +125,19 @@ module-settings:
 
   # -- Extra envFrom
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables
   env: []
 
   # -- Additional volumeMounts
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes
   volumes: []
@@ -169,9 +167,8 @@ module-settings:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector:
-        {}
-        # prometheus: kube-prometheus
+      selector: {}
+      # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
@@ -236,21 +233,19 @@ admin:
 
   # -- Extra envFrom to pass to the Admin Panel
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the Admin Panel
   env: []
 
   # -- Additional volumeMounts to the Admin main container
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes to the Admin pod
   volumes: []
@@ -285,27 +280,25 @@ admin:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
+    extraPaths: []
+    # - path: /*
+    #   backend:
+    #     serviceName: ssl-redirect
+    #     servicePort: use-annotation
+    ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
+    # - path: /*
+    #   pathType: Prefix
+    #   backend:
+    #     service:
+    #       name: ssl-redirect
+    #       port:
+    #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls:
-      []
-      # - hosts:
-      #     - conduit-helm-admin.dev.quintessential.gr
-      #   secretName: conduit-helm-admin-tls
+    tls: []
+    # - hosts:
+    #     - conduit-helm-admin.dev.quintessential.gr
+    #   secretName: conduit-helm-admin-tls
 
 # -- Core module
 core:
@@ -358,21 +351,19 @@ core:
 
   # -- Extra envFrom to pass to the core
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the core
   env: []
 
   # -- Additional volumeMounts to the core main container
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes to the core pod
   volumes: []
@@ -413,9 +404,8 @@ core:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector:
-        {}
-        # prometheus: kube-prometheus
+      selector: {}
+      # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
@@ -445,27 +435,25 @@ core:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
+    extraPaths: []
+    # - path: /*
+    #   backend:
+    #     serviceName: ssl-redirect
+    #     servicePort: use-annotation
+    ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
+    # - path: /*
+    #   pathType: Prefix
+    #   backend:
+    #     service:
+    #       name: ssl-redirect
+    #       port:
+    #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls:
-      []
-      # - hosts:
-      #     - conduit-helm-admin-api.dev.quintessential.gr
-      #   secretName: conduit-helm-admin-api-tls
+    tls: []
+    # - hosts:
+    #     - conduit-helm-admin-api.dev.quintessential.gr
+    #   secretName: conduit-helm-admin-api-tls
 
   # -- Alternative option for the host URL if ingress host is not defined.
   hostName: ""
@@ -521,21 +509,19 @@ database:
 
   # -- Extra envFrom to pass to the database
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the database
   env: []
 
   # -- Additional volumeMounts to the database main container
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes to the database pod
   volumes: []
@@ -566,9 +552,8 @@ database:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector:
-        {}
-        # prometheus: kube-prometheus
+      selector: {}
+      # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
@@ -636,21 +621,19 @@ router:
 
   # -- Extra envFrom to pass to the router
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the router
   env: []
 
   # -- Additional volumeMounts to the router main container
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes to the router pod
   volumes: []
@@ -691,9 +674,8 @@ router:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector:
-        {}
-        # prometheus: kube-prometheus
+      selector: {}
+      # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
@@ -723,27 +705,25 @@ router:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
+    extraPaths: []
+    # - path: /*
+    #   backend:
+    #     serviceName: ssl-redirect
+    #     servicePort: use-annotation
+    ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
+    # - path: /*
+    #   pathType: Prefix
+    #   backend:
+    #     service:
+    #       name: ssl-redirect
+    #       port:
+    #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls:
-      []
-      # - hosts:
-      #     - conduit-helm-core.dev.quintessential.gr
-      #   secretName: conduit-helm-core-tls
+    tls: []
+    # - hosts:
+    #     - conduit-helm-core.dev.quintessential.gr
+    #   secretName: conduit-helm-core-tls
 
   # -- Alternative option for the host URL if ingress host is not defined.
   hostName: ""
@@ -789,21 +769,19 @@ redis:
 
   # -- Extra envFrom to pass to the redis
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the redis
   env: []
 
   # -- Additional volumeMounts to the redis main container
-  volumeMounts:
-    []
-    # - mountPath: /test-cinder
-    #   name: test-volume
+  volumeMounts: []
+  # - mountPath: /test-cinder
+  #   name: test-volume
 
   # -- Additional volumes to the redis pod
   volumes: []
@@ -869,12 +847,11 @@ mongodb:
 
   # -- Extra envFrom to pass to the mongodb
   # @default -- `[]`
-  envFrom:
-    []
-    # - configMapRef:
-    #     name: config-map-name
-    # - secretRef:
-    #     name: secret-name
+  envFrom: []
+  # - configMapRef:
+  #     name: config-map-name
+  # - secretRef:
+  #     name: secret-name
 
   # -- Extra environment variables to pass to the mongodb
   env: []
