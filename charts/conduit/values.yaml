@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: v0.15.9
+    tag: v0.15.12
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: IfNotPresent
 
@@ -125,7 +125,8 @@ module-settings:
 
   # -- Extra envFrom
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -135,7 +136,8 @@ module-settings:
   env: []
 
   # -- Additional volumeMounts
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -167,7 +169,8 @@ module-settings:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
@@ -208,7 +211,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: v0.15.6
+    tag: v0.15.10
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -233,7 +236,8 @@ admin:
 
   # -- Extra envFrom to pass to the Admin Panel
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -243,7 +247,8 @@ admin:
   env: []
 
   # -- Additional volumeMounts to the Admin main container
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -280,7 +285,8 @@ admin:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   backend:
       #     serviceName: ssl-redirect
@@ -295,7 +301,8 @@ admin:
       #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: []
+    tls:
+      []
       # - hosts:
       #     - conduit-helm-admin.dev.quintessential.gr
       #   secretName: conduit-helm-admin-tls
@@ -351,7 +358,8 @@ core:
 
   # -- Extra envFrom to pass to the core
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -361,7 +369,8 @@ core:
   env: []
 
   # -- Additional volumeMounts to the core main container
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -399,11 +408,12 @@ core:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name:  # core
+      name: # core
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
@@ -434,7 +444,8 @@ core:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   backend:
       #     serviceName: ssl-redirect
@@ -449,7 +460,8 @@ core:
       #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: []
+    tls:
+      []
       # - hosts:
       #     - conduit-helm-admin-api.dev.quintessential.gr
       #   secretName: conduit-helm-admin-api-tls
@@ -508,7 +520,8 @@ database:
 
   # -- Extra envFrom to pass to the database
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -518,7 +531,8 @@ database:
   env: []
 
   # -- Additional volumeMounts to the database main container
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -546,11 +560,12 @@ database:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name:  # database-provider
+      name: # database-provider
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
@@ -619,7 +634,8 @@ router:
 
   # -- Extra envFrom to pass to the router
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -629,7 +645,8 @@ router:
   env: []
 
   # -- Additional volumeMounts to the router main container
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -667,11 +684,12 @@ router:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name:  # router
+      name: # router
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
@@ -702,7 +720,8 @@ router:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   backend:
       #     serviceName: ssl-redirect
@@ -717,7 +736,8 @@ router:
       #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: []
+    tls:
+      []
       # - hosts:
       #     - conduit-helm-core.dev.quintessential.gr
       #   secretName: conduit-helm-core-tls
@@ -766,7 +786,8 @@ redis:
 
   # -- Extra envFrom to pass to the redis
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -776,7 +797,8 @@ redis:
   env: []
 
   # -- Additional volumeMounts to the redis main container
-  volumeMounts: []
+  volumeMounts:
+    []
     # - mountPath: /test-cinder
     #   name: test-volume
 
@@ -844,7 +866,8 @@ mongodb:
 
   # -- Extra envFrom to pass to the mongodb
   # @default -- `[]`
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -883,7 +906,6 @@ loki:
   setup: true
 
   loki:
-
     # -- Single tenant deployment needed for loki
     auth_enabled: false
 
@@ -893,7 +915,7 @@ loki:
       replication_factor: 1
 
     storage:
-      type: 'filesystem'
+      type: "filesystem"
     rulerConfig:
       storage:
         type: local
