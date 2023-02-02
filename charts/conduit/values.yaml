@@ -408,7 +408,8 @@ core:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name: # core
+      # core
+      name:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
@@ -560,7 +561,8 @@ database:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name: # database-provider
+      # database-provider
+      name:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
@@ -684,7 +686,8 @@ router:
       # -- Metrics service port
       targetPort: 9100
     serviceMonitor:
-      name: # router
+      # router
+      name:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
