@@ -859,7 +859,7 @@ mongodb:
   # -- Additional volumeMounts to the mongodb main container
   volumeMounts:
     - name: persistent-storage
-      mountPath: /data
+      mountPath: /data/db
 
   # -- Additional volumes to the mongodb pod
   volumes:
