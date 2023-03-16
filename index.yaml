@@ -3,6 +3,25 @@ entries:
   conduit:
   - apiVersion: v2
     appVersion: v0.15.15
+    created: "2023-03-16T08:15:22.514218895Z"
+    dependencies:
+    - condition: loki.setup
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 3.2.0
+    - condition: prometheus.setup
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 15.14.0
+    description: A Helm chart for Conduit.
+    digest: 3436d40fe273c75488c9b8a9e73cdc607dbacd1b19747fad82b7811bbd5c9cf6
+    name: conduit
+    type: application
+    urls:
+    - https://github.com/ConduitPlatform/helm-charts/releases/download/conduit-0.1.13/conduit-0.1.13.tgz
+    version: 0.1.13
+  - apiVersion: v2
+    appVersion: v0.15.15
     created: "2023-03-15T12:19:03.696177442Z"
     dependencies:
     - condition: loki.setup
@@ -248,4 +267,4 @@ entries:
     urls:
     - https://github.com/ConduitPlatform/helm-charts/releases/download/conduit-0.1.0/conduit-0.1.0.tgz
     version: 0.1.0
-generated: "2023-03-15T12:19:03.696259942Z"
+generated: "2023-03-16T08:15:22.514317898Z"
