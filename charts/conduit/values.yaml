@@ -63,6 +63,18 @@ install:
       name: email
     metrics:
       enabled: true
+  authorization:
+    enabled: false
+    image:
+      name: authorization
+    metrics:
+      enabled: true
+  functions:
+    enabled: false
+    image:
+      name: functions
+    metrics:
+      enabled: true
   forms:
     enabled: true
     image:
