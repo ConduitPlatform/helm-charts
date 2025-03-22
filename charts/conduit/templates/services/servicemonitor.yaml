@@ -1,9 +1,11 @@
 {{ $moduleSettings := index .Values "module-settings" }}
+{{ $moduleSettingsMonitor := $moduleSettings.metrics.serviceMonitor.enabled}}
 {{- range $module, $spec := .Values.install -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $specMetrics.service -}}
 {{- $specServiceMonitor := $specMetrics.serviceMonitor -}}
 {{- if and $spec.enabled $spec.metrics.enabled }}
+{{- if or $.Values.global.enableServiceMonitors $specServiceMonitor $moduleSettingsMonitor }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -16,7 +18,7 @@ metadata:
   {{- end }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
     release: {{ template "conduit-helm.fullname" $ }}
     {{- if $moduleSettings.metrics.serviceMonitor.selector }}
       {{- toYaml $moduleSettings.metrics.serviceMonitor.selector | nindent 4 }}
@@ -34,7 +36,7 @@ spec:
   selector:
     matchLabels:
 {{ include "conduit-helm.selectorLabels" $ | indent 6 }}
-      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   namespaceSelector:
     matchNames:
       - {{ $.Release.Namespace }}
@@ -72,5 +74,6 @@ spec:
       tlsConfig:
         {{- toYaml $moduleSettings.metrics.serviceMonitor.tlsConfig | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

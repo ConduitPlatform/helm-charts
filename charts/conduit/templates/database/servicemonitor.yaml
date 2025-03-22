@@ -1,5 +1,7 @@
 {{- $databaseName := include "conduit-helm.database.fullname" . -}}
 {{- if .Values.database.metrics.enabled }}
+{{- if or .Values.global.enableServiceMonitors .Values.database.metrics.serviceMonitor.enabled }}
+
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -24,7 +26,7 @@ spec:
       app: {{ $databaseName }}
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}  
+      - {{ .Release.Namespace }}
   endpoints:
     - port:  {{ .Values.database.metrics.service.name }}
       path: /metrics
@@ -46,4 +48,5 @@ spec:
       tlsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}

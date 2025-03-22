@@ -1,5 +1,7 @@
 {{- $routerName := include "conduit-helm.router.fullname" . -}}
 {{- if and .Values.router.enabled .Values.router.metrics.enabled }}
+{{- if or .Values.global.enableServiceMonitors .Values.router.metrics.serviceMonitor.enabled }}
+
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -46,4 +48,5 @@ spec:
       tlsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}
