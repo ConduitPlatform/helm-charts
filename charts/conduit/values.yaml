@@ -18,7 +18,7 @@ global:
     # -- Global repository option
     repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: v0.15.15
+    tag: v0.16.12
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: IfNotPresent
 
@@ -52,19 +52,19 @@ install:
     metrics:
       enabled: true
   chat:
-    enabled: true
+    enabled: false
     image:
       name: chat
     metrics:
       enabled: true
   email:
-    enabled: true
+    enabled: false
     image:
       name: email
     metrics:
       enabled: true
   authorization:
-    enabled: false
+    enabled: true
     image:
       name: authorization
     metrics:
@@ -76,7 +76,7 @@ install:
     metrics:
       enabled: true
   forms:
-    enabled: true
+    enabled: false
     image:
       name: forms
     metrics:
@@ -88,13 +88,13 @@ install:
     metrics:
       enabled: true
   sms:
-    enabled: true
+    enabled: false
     image:
       name: sms
     metrics:
       enabled: true
   storage:
-    enabled: true
+    enabled: false
     image:
       name: storage
     metrics:
@@ -117,11 +117,11 @@ module-settings:
   # -- Resource limits and requests
   resources:
     requests:
-      memory: "300Mi"
-      cpu: "100m"
+      memory: "150Mi"
+      cpu: "0"
     limits:
       memory: "500Mi"
-      cpu: "200m"
+      cpu: "1000m"
 
   # -- Configure for the container port
   containerPort: 5000
@@ -220,7 +220,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: v0.15.12
+    tag: v0.15.15
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -229,10 +229,10 @@ admin:
   resources:
     requests:
       memory: "300Mi"
-      cpu: "100m"
+      cpu: "0"
     limits:
       memory: "500Mi"
-      cpu: "200m"
+      cpu: "1000m"
 
   # -- Init containers to add to the admin pod
   initContainers: []
