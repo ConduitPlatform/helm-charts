@@ -1,4 +1,6 @@
 {{- if .Values.router.enabled }}
+{{ $moduleSettings := index .Values "module-settings" }}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,10 +11,18 @@ metadata:
   {{- if .Values.router.service.labels }}
     {{- toYaml .Values.router.service.labels | nindent 4 }}
   {{- end }}
-  {{- if .Values.router.service.annotations }}
   annotations:
+    {{- if .Values.router.metrics.enabled }}
+    {{- if .Values.prometheus.setup }}
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.router.metrics.service.port }}"
+    prometheus.io/path: /metrics
+    prometheus.io/scheme: http
+    {{- end }}
+    {{- end }}
+    {{- if .Values.router.service.annotations }}
     {{- toYaml .Values.router.service.annotations | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   selector:
 {{ include "conduit-helm.selectorLabels" . | indent 4 }}

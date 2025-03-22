@@ -1,5 +1,6 @@
 {{- $coreName := include "conduit-helm.core.fullname" . -}}
 {{- if .Values.core.metrics.enabled }}
+{{- if or .Values.global.enableServiceMonitors .Values.core.metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -46,4 +47,5 @@ spec:
       tlsConfig:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}

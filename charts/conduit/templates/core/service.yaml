@@ -1,3 +1,4 @@
+{{ $moduleSettings := index .Values "module-settings" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,10 +9,18 @@ metadata:
   {{- if .Values.core.service.labels }}
     {{- toYaml .Values.core.service.labels | nindent 4 }}
   {{- end }}
-  {{- if .Values.core.service.annotations }}
   annotations:
+    {{- if .Values.core.metrics.enabled }}
+    {{- if .Values.prometheus.setup }}
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.core.metrics.service.port }}"
+    prometheus.io/path: /metrics
+    prometheus.io/scheme: http
+    {{- end }}
+    {{- end }}
+    {{- if .Values.core.service.annotations }}
     {{- toYaml .Values.core.service.annotations | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   selector:
 {{ include "conduit-helm.selectorLabels" . | indent 4 }}

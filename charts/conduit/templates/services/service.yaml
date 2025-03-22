@@ -8,10 +8,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   {{- if $moduleSettings.service.labels }}
     {{- toYaml $moduleSettings.service.labels | nindent 4 }}
   {{- end }}
@@ -29,14 +29,22 @@ metadata:
     {{- toYaml $spec.service.annotations | nindent 4 }}
   {{- end }}
   {{- end }}
+  {{- if $spec.metrics.enabled }}
+  {{- if $.Values.prometheus.setup }}
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port $specMetricsService.port }}"
+    prometheus.io/path: /metrics
+    prometheus.io/scheme: http
+  {{- end }}
+  {{- end }}
 spec:
   selector:
 {{ include "conduit-helm.selectorLabels" $ | indent 4 }}
     app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   ports:
     - protocol: TCP
-      port:  {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
-      name:  tcp
+      port: {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+      name: tcp
       targetPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.grpc_port }}
 {{- if $spec.metrics.enabled }}
     - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
@@ -45,4 +53,4 @@ spec:
 {{- end }}
   type: ClusterIP
 {{- end }}
-{{- end }}    
+{{- end }}
