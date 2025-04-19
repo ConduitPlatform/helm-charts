@@ -1,8 +1,8 @@
 {{- $databaseName := include "conduit-helm.database.fullname" . -}}
 {{- if .Values.database.metrics.enabled }}
 {{- if or .Values.global.enableServiceMonitors .Values.database.metrics.serviceMonitor.enabled }}
-
-apiVersion: monitoring.coreos.com/v1
+---
+apiVersion: {{ .Values.global.serviceMonitorApi | default "monitoring.coreos.com/v1" }}
 kind: ServiceMonitor
 metadata:
   name: {{ default $databaseName .Values.database.metrics.serviceMonitor.name }}

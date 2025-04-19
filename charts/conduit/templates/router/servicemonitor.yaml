@@ -1,8 +1,8 @@
 {{- $routerName := include "conduit-helm.router.fullname" . -}}
 {{- if and .Values.router.enabled .Values.router.metrics.enabled }}
 {{- if or .Values.global.enableServiceMonitors .Values.router.metrics.serviceMonitor.enabled }}
-
-apiVersion: monitoring.coreos.com/v1
+---
+apiVersion: {{ .Values.global.serviceMonitorApi | default "monitoring.coreos.com/v1" }}
 kind: ServiceMonitor
 metadata:
   name: {{ default $routerName .Values.router.metrics.serviceMonitor.name }}
