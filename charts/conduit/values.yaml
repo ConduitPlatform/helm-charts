@@ -1006,7 +1006,7 @@ hpa:
 # -- Pod Disruption Budget global defaults
 pdb:
   enabled: false
-  minAvailable: 1 # alternatively set maxUnavailable
+  minAvailable: 1  # alternatively set maxUnavailable
 
 # -- NetworkPolicy global defaults
 networkPolicy:
