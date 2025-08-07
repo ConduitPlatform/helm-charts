@@ -236,8 +236,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Validate global image tag version (must be 'latest' or >= v0.16.18) */}}
 {{- define "conduit-helm.validateImageTag" -}}
 {{- $tag := default "" .Values.global.image.tag -}}
-{{- if and $tag (not (eq $tag "latest")) (semverCompare "<v0.16.18" $tag) -}}
-{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest' or v0.16.18+" $tag) -}}
+{{- if and $tag (not (eq $tag "latest")) (not (eq $tag "dev")) (semverCompare "<v0.16.18" $tag) -}}
+{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest', 'dev' or v0.16.18+" $tag) -}}
 {{- end -}}
 {{- end -}}
 
