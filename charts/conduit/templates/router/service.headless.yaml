@@ -35,7 +35,7 @@ spec:
       targetPort: 3001
       name: socket
 {{- if .Values.router.metrics.enabled }}
-    - port:{{ .Values.global.config.metrics_port }}
+    - port: {{ .Values.global.config.metrics_port }}
       name: {{ .Values.router.metrics.service.name }}
       targetPort:  {{ .Values.global.config.metrics_port }}
 {{- end }}
