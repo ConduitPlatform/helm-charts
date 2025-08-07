@@ -6,17 +6,18 @@ metadata:
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.core.fullname" . }}
+    {{- if .Values.core.metrics.enabled }}
+    metrics.conduit.dev/enabled: "true"
+    {{- end }}
   {{- if .Values.core.service.labels }}
     {{- toYaml .Values.core.service.labels | nindent 4 }}
   {{- end }}
   annotations:
-    {{- if .Values.core.metrics.enabled }}
-    {{- if .Values.prometheus.setup }}
+    {{- if and .Values.core.metrics.enabled .Values.prometheus.setup (not .Values.global.enableServiceMonitors) (not .Values.core.metrics.serviceMonitor.enabled) }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.core.metrics.service.port }}"
     prometheus.io/path: /metrics
     prometheus.io/scheme: http
-    {{- end }}
     {{- end }}
     {{- if .Values.core.service.annotations }}
     {{- toYaml .Values.core.service.annotations | nindent 4 }}

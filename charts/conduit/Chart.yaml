@@ -1,6 +1,6 @@
 apiVersion: v2
 name: conduit
-description: A Helm chart for Conduit.
+description: Conduit backend platform – full stack micro-services Helm chart.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -15,13 +15,27 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.1
+version: 0.2.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.16.14"
+appVersion: "v0.16.17"
+
+home: https://getconduit.dev
+sources:
+  - https://github.com/ConduitPlatform/conduit
+keywords:
+  - conduit
+  - backend
+  - microservices
+icon: https://raw.githubusercontent.com/ConduitPlatform/conduit/main/docs/logo.png
+maintainers:
+  - name: Conduit Platform
+    email: hello@getconduit.dev
+    url: https://github.com/ConduitPlatform
+
 
 dependencies:
   - name: loki

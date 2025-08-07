@@ -3,19 +3,15 @@
 {{- $specService := $spec.service -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
-{{- $specServiceMonitor := (default (dict) $spec.metrics.serviceMonitor) -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}-headless
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
     app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
-    {{- if $spec.metrics.enabled }}
-    metrics.conduit.dev/enabled: "true"
-    {{- end }}
   {{- if $moduleSettings.service.labels }}
     {{- toYaml $moduleSettings.service.labels | nindent 4 }}
   {{- end }}
@@ -33,26 +29,21 @@ metadata:
     {{- toYaml $spec.service.annotations | nindent 4 }}
   {{- end }}
   {{- end }}
-  {{- if and $spec.metrics.enabled $.Values.prometheus.setup (not $.Values.global.enableServiceMonitors) (not $moduleSettings.metrics.serviceMonitor.enabled) (not $specServiceMonitor.enabled) }}
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port $specMetricsService.port }}"
-    prometheus.io/path: /metrics
-    prometheus.io/scheme: http
-  {{- end }}
 spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
   selector:
 {{ include "conduit-helm.selectorLabels" $ | indent 4 }}
     app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   ports:
     - protocol: TCP
-      port: {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+      port: {{ coalesce $specService.grpc_port $moduleSettings.containerPort $.Values.global.config.grpc_port }}
       name: tcp
       targetPort: {{ coalesce $specService.grpc_port $moduleSettings.containerPort $.Values.global.config.grpc_port }}
 {{- if $spec.metrics.enabled }}
-    - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
+    - port: {{ $.Values.global.config.metrics_port }}
       name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
       targetPort: {{ $.Values.global.config.metrics_port }}
 {{- end }}
-  type: ClusterIP
 {{- end }}
 {{- end }}

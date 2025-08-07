@@ -1,0 +1,28 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "conduit-helm.fullname" . }}-allow-same-namespace
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app.kubernetes.io/component: networking
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+{{- if .Values.networkPolicy.ingress }}
+{{ toYaml .Values.networkPolicy.ingress | indent 4 }}
+{{- else }}
+    - from:
+        - podSelector: {}
+{{- end }}
+  egress:
+{{- if .Values.networkPolicy.egress }}
+{{ toYaml .Values.networkPolicy.egress | indent 4 }}
+{{- else }}
+    - to:
+        - podSelector: {}
+{{- end }}
+{{- end }}

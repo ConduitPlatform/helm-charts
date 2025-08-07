@@ -10,7 +10,7 @@
 apiVersion: {{ $.Values.global.serviceMonitorApi | default "monitoring.coreos.com/v1" }}
 kind: ServiceMonitor
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ default $module $moduleSettings.metrics.serviceMonitor.name $specServiceMonitor.name }}
+  name: {{ template "conduit-helm.fullname" $ }}-{{ coalesce $specServiceMonitor.name $moduleSettings.metrics.serviceMonitor.name $module }}
   {{- if $specServiceMonitor.namespace }}
   namespace: {{ $specServiceMonitor.namespace }}
   {{- else if $moduleSettings.metrics.serviceMonitor.namespace }}
@@ -37,6 +37,7 @@ spec:
     matchLabels:
 {{ include "conduit-helm.selectorLabels" $ | indent 6 }}
       app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+      metrics.conduit.dev/enabled: "true"
   namespaceSelector:
     matchNames:
       - {{ $.Release.Namespace }}

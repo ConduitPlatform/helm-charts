@@ -4,27 +4,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "conduit-helm.router.fullname" . }}
+  name: {{ template "conduit-helm.router.fullname" . }}-headless
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.router.fullname" . }}
-    {{- if .Values.router.metrics.enabled }}
-    metrics.conduit.dev/enabled: "true"
-    {{- end }}
   {{- if .Values.router.service.labels }}
     {{- toYaml .Values.router.service.labels | nindent 4 }}
   {{- end }}
   annotations:
-    {{- if and .Values.router.metrics.enabled .Values.prometheus.setup (not .Values.global.enableServiceMonitors) (not .Values.router.metrics.serviceMonitor.enabled) }}
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.router.metrics.service.port }}"
-    prometheus.io/path: /metrics
-    prometheus.io/scheme: http
-    {{- end }}
     {{- if .Values.router.service.annotations }}
     {{- toYaml .Values.router.service.annotations | nindent 4 }}
     {{- end }}
 spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
   selector:
 {{ include "conduit-helm.selectorLabels" . | indent 4 }}
     app: {{ template "conduit-helm.router.fullname" . }}
@@ -48,11 +41,5 @@ spec:
     - port: {{ .Values.router.metrics.service.port }}
       name: {{ .Values.router.metrics.service.name }}
       targetPort:  {{ .Values.global.config.metrics_port }}
-{{- end }}
-  type: {{ .Values.router.service.type }}
-{{- if eq .Values.router.service.type "LoadBalancer" }}
-{{- if .Values.router.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.router.service.loadBalancerIP | quote }}
-{{- end }}
 {{- end }}
 {{- end }}

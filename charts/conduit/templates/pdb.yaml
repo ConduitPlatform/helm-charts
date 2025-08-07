@@ -1,0 +1,20 @@
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "conduit-helm.fullname" . }}-pdb
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app.kubernetes.io/component: core
+spec:
+  {{- if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+{{ include "conduit-helm.selectorLabels" . | indent 6 }}
+      app: {{ include "conduit-helm.core.fullname" . }}
+{{- end }}

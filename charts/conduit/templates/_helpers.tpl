@@ -233,6 +233,26 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Validate global image tag version (must be 'latest' or >= v0.16.18) */}}
+{{- define "conduit-helm.validateImageTag" -}}
+{{- $tag := default "" .Values.global.image.tag -}}
+{{- if and $tag (not (eq $tag "latest")) (semverCompare "<v0.16.18" $tag) -}}
+{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest' or v0.16.18+" $tag) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the ServiceAccount name
+*/}}
+{{- define "conduit-helm.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "conduit-helm.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+{{- printf "%s" .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 -------------------- Versions --------------------
 */}}
 

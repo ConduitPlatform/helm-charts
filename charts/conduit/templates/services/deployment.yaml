@@ -6,29 +6,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   namespace: {{ $.Release.Namespace }}
   annotations:
     {{- if $moduleSettings.annotations }}
       {{- toYaml $moduleSettings.annotations | nindent 4 }}
-    {{- end }}  
+    {{- end }}
     {{- if $spec.annotations }}
       {{- toYaml $spec.annotations | nindent 4 }}
-    {{- end }} 
+    {{- end }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
 spec:
   replicas: {{ default $moduleSettings.replicas $spec.replicas }}
   selector:
     matchLabels:
 {{ include "conduit-helm.selectorLabels" $ | indent 6 }}
-      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   template:
     metadata:
       labels:
 {{ include "conduit-helm.labels" $ | indent 8 }}
-        app: {{ template "conduit-helm.fullname" $ }}-{{ $module }} 
+        app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
       {{- if $moduleSettings.podLabels }}
         {{- toYaml $moduleSettings.podLabels | nindent 8 }}
       {{- end }}
@@ -43,6 +43,15 @@ spec:
         {{- toYaml $spec.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "conduit-helm.serviceAccountName" $ }}
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with $.Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       initContainers:
       {{- if $moduleSettings.initContainers }}
         {{- toYaml $moduleSettings.initContainers | nindent 6 }}
@@ -52,7 +61,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $module }}
-          image: {{ default $.Values.global.image.repository $spec.image.repository }}/{{ $spec.image.name }}:{{ default $.Values.global.image.tag $spec.image.tag }} 
+          image: {{ default $.Values.global.image.repository $spec.image.repository }}/{{ $spec.image.name }}:{{ default $.Values.global.image.tag $spec.image.tag }}
           imagePullPolicy: {{ default $.Values.global.image.imagePullPolicy $spec.image.imagePullPolicy }}
           command:
             {{- if $moduleSettings.extraArgs }}
@@ -61,15 +70,27 @@ spec:
             {{- if $spec.extraArgs }}
               {{- toYaml $spec.extraArgs | nindent 12 }}
             {{- end }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           resources:
             {{- if $moduleSettings.resources }}
               {{- toYaml $moduleSettings.resources | nindent 12 }}
-            {{- end }}  
+            {{- end }}
             {{- if $spec.resources }}
               {{- toYaml $spec.resources | nindent 12 }}
             {{- end }}
           ports:
-            - containerPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $spec.containerPort }}
+            - containerPort: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+          readinessProbe:
+            grpc:
+              port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            grpc:
+              port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
           envFrom:
             - configMapRef:
                 name: conduit-cm
@@ -81,7 +102,7 @@ spec:
             {{- end }}
           env:
             - name: SERVICE_URL
-              value: {{ template "conduit-helm.fullname" $ }}-{{ $module }}:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+              value: {{ template "conduit-helm.fullname" $ }}-{{ $module }}-headless:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
             - name: CONDUIT_NAMESPACE
               value: {{ $.Release.Namespace }}
             {{- if $.Values.global.secret.grpc_enable }}
@@ -90,9 +111,9 @@ spec:
                 secretKeyRef:
                   name: conduit-secret
                   key: GRPC_KEY
-            {{- end }} 
+            {{- end }}
             - name: GRPC_PORT
-              value: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.containerPort | quote }} 
+              value: {{ coalesce $specService.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
             {{- if $moduleSettings.env }}
               {{- toYaml $moduleSettings.env | nindent 12 }}
             {{- end }}
@@ -120,4 +141,4 @@ spec:
           {{- toYaml $spec.volumes | nindent 8 }}
         {{- end }}
 {{- end }}
-{{- end }}            
+{{- end }}

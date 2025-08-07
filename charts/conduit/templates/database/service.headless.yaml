@@ -2,27 +2,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "conduit-helm.database.fullname" . }}
+  name: {{ template "conduit-helm.database.fullname" . }}-headless
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.database.fullname" . }}
-    {{- if .Values.database.metrics.enabled }}
-    metrics.conduit.dev/enabled: "true"
-    {{- end }}
   {{- if .Values.database.service.labels }}
     {{- toYaml .Values.database.service.labels | nindent 4 }}
   {{- end }}
   annotations:
-    {{- if and .Values.database.metrics.enabled .Values.prometheus.setup (not .Values.global.enableServiceMonitors) (not .Values.database.metrics.serviceMonitor.enabled) }}
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.database.metrics.service.port }}"
-    prometheus.io/path: /metrics
-    prometheus.io/scheme: http
-    {{- end }}
     {{- if .Values.database.service.annotations }}
     {{- toYaml .Values.database.service.annotations | nindent 4 }}
     {{- end }}
 spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
   selector:
 {{ include "conduit-helm.selectorLabels" . | indent 4 }}
     app: {{ template "conduit-helm.database.fullname" . }}
@@ -36,4 +29,3 @@ spec:
       name: {{ .Values.database.metrics.service.name }}
       targetPort:  {{ .Values.global.config.metrics_port }}
 {{- end }}
-  type: ClusterIP
