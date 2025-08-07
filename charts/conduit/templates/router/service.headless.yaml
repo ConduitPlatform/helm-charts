@@ -23,22 +23,19 @@ spec:
     app: {{ template "conduit-helm.router.fullname" . }}
   ports:
     - protocol: TCP
-      port: {{ .Values.router.service.tcp_port }}
+      port: 3000
       targetPort: 3000
       name: tcp
     - protocol: TCP
-      port: {{ .Values.router.service.grpc_port }}
+      port: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
       targetPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
       name: grpc
-      {{- if eq .Values.router.service.type "NodePort" }}
-      nodePort: {{ .Values.router.service.nodePort }}
-      {{- end }}
     - protocol: TCP
-      port: {{ .Values.router.service.socket_port }}
+      port: 3001
       targetPort: 3001
       name: socket
 {{- if .Values.router.metrics.enabled }}
-    - port: {{ .Values.router.metrics.service.port }}
+    - port:{{ .Values.global.config.metrics_port }}
       name: {{ .Values.router.metrics.service.name }}
       targetPort:  {{ .Values.global.config.metrics_port }}
 {{- end }}
