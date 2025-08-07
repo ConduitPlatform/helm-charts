@@ -16,11 +16,11 @@ apiVersionOverrides:
 global:
   image:
     # -- Global repository option
-    repository: conduitplatform
+    repository: ghcr.io/conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
-    tag: v0.16.12
+    tag: v0.16.17
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
-    imagePullPolicy: IfNotPresent
+    imagePullPolicy: Never
 
   # -- Configs
   config:
@@ -222,7 +222,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: v0.15.15
+    tag: experimental
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -281,7 +281,7 @@ admin:
 
   # -- Enable an ingress resource for the Admin Panel
   ingress:
-    enabled: false
+    enabled: true
 
     # -- Additional ingress annotations
     annotations:
@@ -291,7 +291,7 @@ admin:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "admin.conduit"
 
     # -- Additional ingress paths
     extraPaths: [ ]
@@ -391,7 +391,7 @@ core:
     # -- Core service tcp port
     tcp_port: 80
     # -- Core service grpc port
-    grpc_port: 55152
+    grpc_port: 5000
     # -- Core service socket port
     socket_port: 3001
     # -- Core service type
@@ -438,7 +438,7 @@ core:
 
   # -- Enable an ingress resource for the Core
   ingress:
-    enabled: false
+    enabled: true
 
     # -- Additional ingress annotations
     annotations:
@@ -448,7 +448,7 @@ core:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "admin-api.conduit"
 
     # -- Additional ingress paths
     extraPaths: [ ]
@@ -712,7 +712,7 @@ router:
 
   # -- Enable an ingress resource for the Router
   ingress:
-    enabled: false
+    enabled: true
 
     # -- Additional ingress annotations
     annotations:
@@ -722,7 +722,7 @@ router:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: ""
+    hostName: "router.conduit"
 
     # -- Additional ingress paths
     extraPaths: [ ]

@@ -7,7 +7,7 @@ metadata:
   annotations:
     {{- with .Values.router.annotations }}
       {{- toYaml . | nindent 4 }}
-    {{- end }}  
+    {{- end }}
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.router.fullname" . }}
@@ -36,7 +36,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Values.router.name }}
-          image: {{ default .Values.global.image.repository .Values.router.image.repository }}/{{ .Values.router.image.name }}:{{ default .Values.global.image.tag .Values.router.image.tag }} 
+          image: {{ default .Values.global.image.repository .Values.router.image.repository }}/{{ .Values.router.image.name }}:{{ default .Values.global.image.tag .Values.router.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.router.image.imagePullPolicy }}
           command:
             {{- with .Values.router.extraArgs }}
@@ -45,11 +45,21 @@ spec:
           resources:
             {{- with .Values.router.resources }}
               {{- toYaml . | nindent 12 }}
-            {{- end }}  
+            {{- end }}
           ports:
             - containerPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
             - containerPort: 3000
             - containerPort: 3001
+          readinessProbe:
+            grpc:
+              port: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            grpc:
+              port: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
           envFrom:
             - configMapRef:
                 name: conduit-cm
@@ -60,7 +70,7 @@ spec:
             - name: __DEFAULT_HOST_URL
               value: {{ template "conduit-helm.router.default_host" . }}
             - name: SERVICE_URL
-              value: {{ template "conduit-helm.router.fullname" . }}:{{ .Values.router.service.grpc_port }}
+              value: {{ template "conduit-helm.router.fullname" . }}-headless:{{ .Values.router.service.grpc_port }}
             - name: CONDUIT_NAMESPACE
               value: {{ .Release.Namespace }}
             {{- if .Values.global.secret.grpc_enable }}
@@ -69,7 +79,7 @@ spec:
                 secretKeyRef:
                   name: conduit-secret
                   key: GRPC_KEY
-            {{- end }}  
+            {{- end }}
             - name: GRPC_PORT
               value: {{ default .Values.global.config.grpc_port .Values.router.containerPort | quote }}
             {{- with .Values.router.env }}

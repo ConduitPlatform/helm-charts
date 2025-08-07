@@ -1,0 +1,31 @@
+{{ $moduleSettings := index .Values "module-settings" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "conduit-helm.database.fullname" . }}-headless
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ template "conduit-helm.database.fullname" . }}
+  {{- if .Values.database.service.labels }}
+    {{- toYaml .Values.database.service.labels | nindent 4 }}
+  {{- end }}
+  annotations:
+    {{- if .Values.database.service.annotations }}
+    {{- toYaml .Values.database.service.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+{{ include "conduit-helm.selectorLabels" . | indent 4 }}
+    app: {{ template "conduit-helm.database.fullname" . }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.database.service.tcp_port }}
+      targetPort: {{ default .Values.global.config.grpc_port .Values.database.containerPort }}
+      name: tcp
+{{- if .Values.database.metrics.enabled }}
+    - port: {{ .Values.database.metrics.service.port }}
+      name: {{ .Values.database.metrics.service.name }}
+      targetPort:  {{ .Values.global.config.metrics_port }}
+{{- end }}

@@ -6,7 +6,7 @@ metadata:
   annotations:
     {{- with .Values.database.annotations }}
       {{- toYaml . | nindent 4 }}
-    {{- end }}  
+    {{- end }}
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.database.fullname" . }}
@@ -35,7 +35,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Values.database.name }}
-          image: {{ default .Values.global.image.repository .Values.database.image.repository }}/{{ .Values.database.image.name }}:{{ default .Values.global.image.tag .Values.database.image.tag }} 
+          image: {{ default .Values.global.image.repository .Values.database.image.repository }}/{{ .Values.database.image.name }}:{{ default .Values.global.image.tag .Values.database.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.database.image.imagePullPolicy }}
           command:
             {{- with .Values.database.extraArgs }}
@@ -44,7 +44,7 @@ spec:
           resources:
             {{- with .Values.database.resources }}
               {{- toYaml . | nindent 12 }}
-            {{- end }}  
+            {{- end }}
           ports:
             - containerPort: {{ default .Values.global.config.grpc_port .Values.database.containerPort }}
           envFrom:
@@ -55,9 +55,23 @@ spec:
             {{- with .Values.database.envFrom }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          readinessProbe:
+            grpc:
+              port: {{ default .Values.global.config.grpc_port .Values.database.containerPort  }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            grpc:
+              port: {{ default .Values.global.config.grpc_port .Values.database.containerPort  }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
           env:
+            - name: GRPC_TRACE
+              value: all
+            - name: GRPC_VERBOSITY
+              value: DEBUG
             - name: SERVICE_URL
-              value: {{ template "conduit-helm.database.fullname" . }}:{{ .Values.database.service.tcp_port }}
+              value: {{ template "conduit-helm.database.fullname" . }}-headless:{{ .Values.database.service.tcp_port }}
             - name: CONDUIT_NAMESPACE
               value: {{ .Release.Namespace }}
             {{- if .Values.global.secret.grpc_enable }}
@@ -72,15 +86,19 @@ spec:
             {{- with .Values.database.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- if .Values.database.volumeMounts}}
           volumeMounts:
             {{- with .Values.database.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
         {{- with .Values.database.extraContainers }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- if .Values.database.volumes}}
       volumes:
         {{- with .Values.database.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-            
+      {{- end }}
+

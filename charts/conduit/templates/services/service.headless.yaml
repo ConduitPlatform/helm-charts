@@ -1,0 +1,49 @@
+{{ $moduleSettings := index .Values "module-settings" }}
+{{- range $module, $spec := .Values.install -}}
+{{- $specService := $spec.service -}}
+{{- $specMetrics := $spec.metrics -}}
+{{- $specMetricsService := $spec.metrics.service -}}
+{{- if $spec.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}-headless
+  labels:
+{{ include "conduit-helm.labels" $ | indent 4 }}
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+  {{- if $moduleSettings.service.labels }}
+    {{- toYaml $moduleSettings.service.labels | nindent 4 }}
+  {{- end }}
+  {{- if $spec.service }}
+  {{- if $spec.service.labels }}
+    {{- toYaml $spec.service.labels | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  annotations:
+  {{- if $moduleSettings.service.annotations }}
+    {{- toYaml $moduleSettings.service.annotations | nindent 4 }}
+  {{- end }}
+  {{- if $spec.service }}
+  {{- if $spec.service.annotations }}
+    {{- toYaml $spec.service.annotations | nindent 4 }}
+  {{- end }}
+  {{- end }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+{{ include "conduit-helm.selectorLabels" $ | indent 4 }}
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+  ports:
+    - protocol: TCP
+      port: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.grpc_port }}
+      name: tcp
+      targetPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.grpc_port }}
+{{- if $spec.metrics.enabled }}
+    - port: {{ $.Values.global.config.metrics_port }}
+      name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
+      targetPort: {{ $.Values.global.config.metrics_port }}
+{{- end }}
+{{- end }}
+{{- end }}
