@@ -77,10 +77,6 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 10
           env:
-            - name: GRPC_TRACE
-              value: all
-            - name: GRPC_VERBOSITY
-              value: DEBUG
             - name: SERVICE_URL
               value: {{ template "conduit-helm.database.fullname" . }}-headless:{{ .Values.database.service.tcp_port }}
             - name: CONDUIT_NAMESPACE
