@@ -61,16 +61,24 @@ spec:
             - containerPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
             - containerPort: 3000
             - containerPort: 3001
+          {{- $readiness := default (dict) .Values.router.readinessProbe }}
+          {{- $liveness := default (dict) .Values.router.livenessProbe }}
           readinessProbe:
             grpc:
               port: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: {{ default $.Values.global.probes.readiness.initialDelaySeconds $readiness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.readiness.periodSeconds $readiness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.readiness.timeoutSeconds $readiness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.readiness.successThreshold $readiness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.readiness.failureThreshold $readiness.failureThreshold }}
           livenessProbe:
             grpc:
               port: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            initialDelaySeconds: {{ default $.Values.global.probes.liveness.initialDelaySeconds $liveness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.liveness.periodSeconds $liveness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.liveness.timeoutSeconds $liveness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.liveness.successThreshold $liveness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.liveness.failureThreshold $liveness.failureThreshold }}
           envFrom:
             - configMapRef:
                 name: conduit-cm

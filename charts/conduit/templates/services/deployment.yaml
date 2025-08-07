@@ -81,16 +81,26 @@ spec:
             {{- end }}
           ports:
             - containerPort: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+          {{- $specReadiness := default (dict) $spec.readinessProbe }}
+          {{- $moduleReadiness := default (dict) $moduleSettings.readinessProbe }}
+          {{- $specLiveness := default (dict) $spec.livenessProbe }}
+          {{- $moduleLiveness := default (dict) $moduleSettings.livenessProbe }}
           readinessProbe:
             grpc:
               port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: {{ coalesce $specReadiness.initialDelaySeconds $moduleReadiness.initialDelaySeconds $.Values.global.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ coalesce $specReadiness.periodSeconds $moduleReadiness.periodSeconds $.Values.global.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ coalesce $specReadiness.timeoutSeconds $moduleReadiness.timeoutSeconds $.Values.global.probes.readiness.timeoutSeconds }}
+            successThreshold: {{ coalesce $specReadiness.successThreshold $moduleReadiness.successThreshold $.Values.global.probes.readiness.successThreshold }}
+            failureThreshold: {{ coalesce $specReadiness.failureThreshold $moduleReadiness.failureThreshold $.Values.global.probes.readiness.failureThreshold }}
           livenessProbe:
             grpc:
               port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            initialDelaySeconds: {{ coalesce $specLiveness.initialDelaySeconds $moduleLiveness.initialDelaySeconds $.Values.global.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ coalesce $specLiveness.periodSeconds $moduleLiveness.periodSeconds $.Values.global.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ coalesce $specLiveness.timeoutSeconds $moduleLiveness.timeoutSeconds $.Values.global.probes.liveness.timeoutSeconds }}
+            successThreshold: {{ coalesce $specLiveness.successThreshold $moduleLiveness.successThreshold $.Values.global.probes.liveness.successThreshold }}
+            failureThreshold: {{ coalesce $specLiveness.failureThreshold $moduleLiveness.failureThreshold $.Values.global.probes.liveness.failureThreshold }}
           envFrom:
             - configMapRef:
                 name: conduit-cm

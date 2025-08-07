@@ -30,6 +30,20 @@ global:
     metrics_port: 9100
     # -- Override for "conduit-helm.conduit.url"
     conduit_url: ""
+  # -- Global probe settings
+  probes:
+    readiness:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 5
+    liveness:
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 5
   secret:
     # -- Master Secret override. Must be given in b64 format.
     MASTER_KEY:

@@ -48,6 +48,26 @@ spec:
             {{- end }}  
           ports:
             - containerPort: 8080
+          {{- $readiness := default (dict) .Values.admin.readinessProbe }}
+          {{- $liveness := default (dict) .Values.admin.livenessProbe }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: {{ default $.Values.global.probes.readiness.initialDelaySeconds $readiness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.readiness.periodSeconds $readiness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.readiness.timeoutSeconds $readiness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.readiness.successThreshold $readiness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.readiness.failureThreshold $readiness.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: {{ default $.Values.global.probes.liveness.initialDelaySeconds $liveness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.liveness.periodSeconds $liveness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.liveness.timeoutSeconds $liveness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.liveness.successThreshold $liveness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.liveness.failureThreshold $liveness.failureThreshold }}
           envFrom:
             - configMapRef:
                 name: conduit-admin-cm

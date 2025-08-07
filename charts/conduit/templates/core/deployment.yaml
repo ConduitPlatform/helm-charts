@@ -69,16 +69,24 @@ spec:
             {{- with .Values.core.envFrom }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- $readiness := default (dict) .Values.core.readinessProbe }}
+          {{- $liveness := default (dict) .Values.core.livenessProbe }}
           readinessProbe:
             grpc:
               port: {{ default .Values.global.config.grpc_port .Values.core.containerPort  }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: {{ default $.Values.global.probes.readiness.initialDelaySeconds $readiness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.readiness.periodSeconds $readiness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.readiness.timeoutSeconds $readiness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.readiness.successThreshold $readiness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.readiness.failureThreshold $readiness.failureThreshold }}
           livenessProbe:
             grpc:
               port: {{ default .Values.global.config.grpc_port .Values.core.containerPort }}
-            initialDelaySeconds: 20
-            periodSeconds: 10
+            initialDelaySeconds: {{ default $.Values.global.probes.liveness.initialDelaySeconds $liveness.initialDelaySeconds }}
+            periodSeconds: {{ default $.Values.global.probes.liveness.periodSeconds $liveness.periodSeconds }}
+            timeoutSeconds: {{ default $.Values.global.probes.liveness.timeoutSeconds $liveness.timeoutSeconds }}
+            successThreshold: {{ default $.Values.global.probes.liveness.successThreshold $liveness.successThreshold }}
+            failureThreshold: {{ default $.Values.global.probes.liveness.failureThreshold $liveness.failureThreshold }}
           env:
             - name: __DEFAULT_HOST_URL
               value: {{ template "conduit-helm.core.default_host" . }}
