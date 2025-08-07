@@ -233,6 +233,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Return the ServiceAccount name
+*/}}
+{{- define "conduit-helm.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "conduit-helm.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+{{- printf "%s" .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 -------------------- Versions --------------------
 */}}
 

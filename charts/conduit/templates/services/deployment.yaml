@@ -43,6 +43,15 @@ spec:
         {{- toYaml $spec.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "conduit-helm.serviceAccountName" $ }}
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with $.Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       initContainers:
       {{- if $moduleSettings.initContainers }}
         {{- toYaml $moduleSettings.initContainers | nindent 6 }}
@@ -61,6 +70,8 @@ spec:
             {{- if $spec.extraArgs }}
               {{- toYaml $spec.extraArgs | nindent 12 }}
             {{- end }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           resources:
             {{- if $moduleSettings.resources }}
               {{- toYaml $moduleSettings.resources | nindent 12 }}

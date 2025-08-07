@@ -30,6 +30,15 @@ spec:
         {{- toYaml .Values.router.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "conduit-helm.serviceAccountName" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.router.initContainers }}
       initContainers:
         {{- toYaml . | nindent 6 }}
@@ -44,6 +53,8 @@ spec:
             {{- end }}
           resources:
             {{- with .Values.router.resources }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           ports:

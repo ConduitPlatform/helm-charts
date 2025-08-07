@@ -8,6 +8,9 @@ metadata:
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.router.fullname" . }}
+    {{- if .Values.router.metrics.enabled }}
+    metrics.conduit.dev/enabled: "true"
+    {{- end }}
   {{- if .Values.router.service.labels }}
     {{- toYaml .Values.router.service.labels | nindent 4 }}
   {{- end }}

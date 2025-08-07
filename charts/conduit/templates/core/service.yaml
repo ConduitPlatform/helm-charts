@@ -6,6 +6,9 @@ metadata:
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.core.fullname" . }}
+    {{- if .Values.core.metrics.enabled }}
+    metrics.conduit.dev/enabled: "true"
+    {{- end }}
   {{- if .Values.core.service.labels }}
     {{- toYaml .Values.core.service.labels | nindent 4 }}
   {{- end }}

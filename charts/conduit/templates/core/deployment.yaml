@@ -28,6 +28,15 @@ spec:
         {{- toYaml .Values.core.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "conduit-helm.serviceAccountName" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- if (not .Values.externalRedis.host ) }}
       initContainers:
         - name: wait-for-redis
@@ -50,6 +59,8 @@ spec:
             {{- with .Values.core.resources }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: conduit-cm

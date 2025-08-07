@@ -37,6 +37,7 @@ spec:
     matchLabels:
 {{ include "conduit-helm.selectorLabels" $ | indent 6 }}
       app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+      metrics.conduit.dev/enabled: "true"
   namespaceSelector:
     matchNames:
       - {{ $.Release.Namespace }}

@@ -12,6 +12,9 @@ metadata:
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
     app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+    {{- if $spec.metrics.enabled }}
+    metrics.conduit.dev/enabled: "true"
+    {{- end }}
   {{- if $moduleSettings.service.labels }}
     {{- toYaml $moduleSettings.service.labels | nindent 4 }}
   {{- end }}

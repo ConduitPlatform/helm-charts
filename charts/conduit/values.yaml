@@ -16,11 +16,11 @@ apiVersionOverrides:
 global:
   image:
     # -- Global repository option
-    repository: ghcr.io/conduitplatform
+    repository: conduitplatform
     # -- Overrides the global Conduit image tag whose default is the chart appVersion
     tag: v0.16.17
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
 
   # -- Configs
   config:
@@ -38,6 +38,33 @@ global:
     # -- Optional GRPC Key override. Must be given in b64 format.
     GRPC_KEY:
   enableServiceMonitors: false
+  # -- (Optional) list of image pull secrets for all pods
+  imagePullSecrets: []
+
+# -- ServiceAccount configuration
+serviceAccount:
+  # -- Specifies whether a ServiceAccount should be created
+  create: true
+  # -- Annotations to add to the ServiceAccount
+  annotations: {}
+  # -- The name of the ServiceAccount. If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- RBAC configuration
+rbac:
+  # -- Whether to create Role & RoleBinding granting in-namespace permissions to the ServiceAccount
+  create: false
+  # -- Custom RBAC rules (overrides default pod-listing example)
+  rules: []
+
+# -- Pod-level security context defaults
+podSecurityContext: {}
+# fsGroup: 2000
+
+# -- Container-level security context defaults
+securityContext: {}
+#  runAsUser: 1000
+#  runAsNonRoot: true
 # -- Microservice-specific values
 
 # -- Options for which services to install. You may override the default 'module-settings' below. Image name is required, since every image name is unique.
@@ -281,7 +308,7 @@ admin:
 
   # -- Enable an ingress resource for the Admin Panel
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
@@ -291,7 +318,7 @@ admin:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: "admin.conduit"
+    hostName: ""
 
     # -- Additional ingress paths
     extraPaths: [ ]
@@ -438,7 +465,7 @@ core:
 
   # -- Enable an ingress resource for the Core
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
@@ -448,7 +475,7 @@ core:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: "admin-api.conduit"
+    hostName: ""
 
     # -- Additional ingress paths
     extraPaths: [ ]
@@ -712,7 +739,7 @@ router:
 
   # -- Enable an ingress resource for the Router
   ingress:
-    enabled: true
+    enabled: false
 
     # -- Additional ingress annotations
     annotations:
@@ -722,7 +749,7 @@ router:
     ingressClassName: ""
 
     # -- Hostnames must be provided if Ingress is enabled.
-    hostName: "router.conduit"
+    hostName: ""
 
     # -- Additional ingress paths
     extraPaths: [ ]
@@ -856,6 +883,14 @@ mongodb:
   # -- Configure for the container port
   port: 27017
 
+  # -- Persistence configuration
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+    storageClass: ""
+
   # -- Init containers to add to the mongo pod
   initContainers: [ ]
 
@@ -959,3 +994,22 @@ prometheus:
 # -- External Prometheus section
 externalPrometheus:
   url: ""
+
+# -- Horizontal Pod Autoscaler global defaults
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# -- Pod Disruption Budget global defaults
+pdb:
+  enabled: false
+  minAvailable: 1 # alternatively set maxUnavailable
+
+# -- NetworkPolicy global defaults
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
