@@ -3,6 +3,7 @@
 {{- $specService := $spec.service -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
+{{- $specServiceMonitor := (default (dict) $spec.metrics.serviceMonitor) -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: v1
