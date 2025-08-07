@@ -53,10 +53,10 @@ spec:
             {{- end }}
           resources:
             {{- with .Values.router.resources }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          securityContext:
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           ports:
             - containerPort: {{ default .Values.global.config.grpc_port .Values.router.containerPort }}
             - containerPort: 3000

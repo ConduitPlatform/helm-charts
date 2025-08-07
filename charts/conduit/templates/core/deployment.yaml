@@ -60,7 +60,7 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml $.Values.securityContext | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: conduit-cm
