@@ -130,16 +130,16 @@ install:
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of pods to run
   replicas: 1
 
   # -- Labels
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations
-  podAnnotations: { }
+  podAnnotations: {}
 
   # -- Resource limits and requests
   resources:
@@ -154,39 +154,39 @@ module-settings:
   containerPort: 5000
 
   # -- Init containers
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes
-  volumes: [ ]
+  volumes: []
 
   # -- Service configuration
   service:
     # -- Service labels
-    labels: { }
+    labels: {}
     # -- Service annotations
-    annotations: { }
+    annotations: {}
     # -- Service tcp port
     tcp_port: 5000
 
@@ -208,20 +208,20 @@ module-settings:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: { }
+      selector: {}
       # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
-      additionalLabels: { }
+      additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
       interval: 30s
       # -- Prometheus [RelabelConfigs] to apply to samples before scraping
-      relabelings: [ ]
+      relabelings: []
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
-      metricRelabelings: [ ]
+      metricRelabelings: []
       # -- Prometheus ServiceMonitor scheme
       scheme: ""
       # -- Prometheus ServiceMonitor tlsConfig
-      tlsConfig: { }
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
 
 # -- Admin Panel module
@@ -231,16 +231,16 @@ admin:
   # -- Admin Panel name
   name: admin
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Admin Panel pods to run
   replicas: 1
 
   # -- Labels to be added to admin pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to admin pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     # -- Image name
@@ -249,7 +249,7 @@ admin:
     repository: ""
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
-    tag: experimental
+    tag: latest
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -264,39 +264,39 @@ admin:
       cpu: "1000m"
 
   # -- Init containers to add to the admin pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the admin pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the admin pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the Admin Panel
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the Admin Panel
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the Admin main container
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes to the Admin pod
-  volumes: [ ]
+  volumes: []
 
   # -- Admin service configuration
   service:
     # -- Admin service labels
-    labels: { }
+    labels: {}
     # -- Admin service annotations
-    annotations: { }
+    annotations: {}
     # -- Admin service http port
     http_port: 80
     # -- Admin service type
@@ -321,7 +321,7 @@ admin:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: [ ]
+    extraPaths: []
     # - path: /*
     #   backend:
     #     serviceName: ssl-redirect
@@ -336,7 +336,7 @@ admin:
     #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: [ ]
+    tls: []
     # - hosts:
     #     - conduit-helm-admin.dev.quintessential.gr
     #   secretName: conduit-helm-admin-tls
@@ -346,16 +346,16 @@ core:
   # -- Core name
   name: core
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Core pods to run
   replicas: 1
 
   # -- Labels to be added to core pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to core pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     # -- Image name
@@ -382,39 +382,39 @@ core:
   containerPort: 5000
 
   # -- Init containers to add to the core pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the core pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the core pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the core
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the core
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the core main container
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes to the core pod
-  volumes: [ ]
+  volumes: []
 
   # -- Core service configuration
   service:
     # -- Core service labels
-    labels: { }
+    labels: {}
     # -- Core service annotations
-    annotations: { }
+    annotations: {}
     # -- Core service tcp port
     tcp_port: 80
     # -- Core service grpc port
@@ -447,20 +447,20 @@ core:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: { }
+      selector: {}
       # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
-      additionalLabels: { }
+      additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
       interval: 30s
       # -- Prometheus [RelabelConfigs] to apply to samples before scraping
-      relabelings: [ ]
+      relabelings: []
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
-      metricRelabelings: [ ]
+      metricRelabelings: []
       # -- Prometheus ServiceMonitor scheme
       scheme: ""
       # -- Prometheus ServiceMonitor tlsConfig
-      tlsConfig: { }
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
 
   # -- Enable an ingress resource for the Core
@@ -478,7 +478,7 @@ core:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: [ ]
+    extraPaths: []
     # - path: /*
     #   backend:
     #     serviceName: ssl-redirect
@@ -493,7 +493,7 @@ core:
     #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: [ ]
+    tls: []
     # - hosts:
     #     - conduit-helm-admin-api.dev.quintessential.gr
     #   secretName: conduit-helm-admin-api-tls
@@ -506,16 +506,16 @@ database:
   # -- Database name
   name: database-provider
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Database pods to run
   replicas: 1
 
   # -- Labels to be added to database pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to database pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     # -- Image name
@@ -542,39 +542,39 @@ database:
   containerPort: 5000
 
   # -- Init containers to add to the database pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the database pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the database pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the database
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the database
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the database main container
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes to the database pod
-  volumes: [ ]
+  volumes: []
 
   # -- Database service configuration
   service:
     # -- Database service labels
-    labels: { }
+    labels: {}
     # -- Database service annotations
-    annotations: { }
+    annotations: {}
     # -- Database service tcp port
     tcp_port: 5000
 
@@ -597,20 +597,20 @@ database:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: { }
+      selector: {}
       # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
-      additionalLabels: { }
+      additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
       interval: 30s
       # -- Prometheus [RelabelConfigs] to apply to samples before scraping
-      relabelings: [ ]
+      relabelings: []
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
-      metricRelabelings: [ ]
+      metricRelabelings: []
       # -- Prometheus ServiceMonitor scheme
       scheme: ""
       # -- Prometheus ServiceMonitor tlsConfig
-      tlsConfig: { }
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
 
 # -- Router module
@@ -620,16 +620,16 @@ router:
   # -- Router name
   name: router
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Router pods to run
   replicas: 1
 
   # -- Labels to be added to router pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to router pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     # -- Image name
@@ -656,39 +656,39 @@ router:
   containerPort: 5000
 
   # -- Init containers to add to the router pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the router pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the router pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the router
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the router
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the router main container
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes to the router pod
-  volumes: [ ]
+  volumes: []
 
   # -- Router service configuration
   service:
     # -- Router service labels
-    labels: { }
+    labels: {}
     # -- Router service annotations
-    annotations: { }
+    annotations: {}
     # -- Router service tcp port
     tcp_port: 80
     # -- Router service grpc port
@@ -721,20 +721,20 @@ router:
       # -- Prometheus ServiceMonitor namespace
       namespace: ""
       # -- Prometheus ServiceMonitor selector
-      selector: { }
+      selector: {}
       # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
-      additionalLabels: { }
+      additionalLabels: {}
       # -- Prometheus ServiceMonitor interval
       interval: 30s
       # -- Prometheus [RelabelConfigs] to apply to samples before scraping
-      relabelings: [ ]
+      relabelings: []
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
-      metricRelabelings: [ ]
+      metricRelabelings: []
       # -- Prometheus ServiceMonitor scheme
       scheme: ""
       # -- Prometheus ServiceMonitor tlsConfig
-      tlsConfig: { }
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
 
   # -- Enable an ingress resource for the Router
@@ -752,7 +752,7 @@ router:
     hostName: ""
 
     # -- Additional ingress paths
-    extraPaths: [ ]
+    extraPaths: []
     # - path: /*
     #   backend:
     #     serviceName: ssl-redirect
@@ -767,7 +767,7 @@ router:
     #         name: use-annotation
 
     # -- Ingress TLS configuration
-    tls: [ ]
+    tls: []
     # - hosts:
     #     - conduit-helm-core.dev.quintessential.gr
     #   secretName: conduit-helm-core-tls
@@ -784,16 +784,16 @@ redis:
   # -- Redis name
   name: redis
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Redis pods to run
   replicas: 1
 
   # -- Labels to be added to redis pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to redis pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     name: redis
@@ -806,39 +806,39 @@ redis:
   port: 6379
 
   # -- Init containers to add to the redis pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the redis pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the redis pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the redis
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the redis
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the redis main container
-  volumeMounts: [ ]
+  volumeMounts: []
   # - mountPath: /test-cinder
   #   name: test-volume
 
   # -- Additional volumes to the redis pod
-  volumes: [ ]
+  volumes: []
 
   # -- Storage service configuration
   service:
     # -- Storage service labels
-    labels: { }
+    labels: {}
     # -- Storage service annotations
-    annotations: { }
+    annotations: {}
 
 # -- External Redis section
 externalRedis:
@@ -852,7 +852,7 @@ externalRedis:
   # When it's set, the `externalRedis.password` parameter is ignored
   existingSecret: ""
   # -- External Redis Secret annotations
-  secretAnnotations: { }
+  secretAnnotations: {}
 
 # -- Default Mongo module
 mongodb:
@@ -861,16 +861,16 @@ mongodb:
   # -- MongoDB name
   name: mongodb
   # -- Extra annotations
-  annotations: [ ]
+  annotations: []
 
   # -- Number of Mongo pods to run
   replicas: 1
 
   # -- Labels to be added to mongo pods
-  podLabels: { }
+  podLabels: {}
 
   # -- Annotations to be added to mongo pods
-  podAnnotations: { }
+  podAnnotations: {}
 
   image:
     name: mongo
@@ -892,24 +892,24 @@ mongodb:
     storageClass: ""
 
   # -- Init containers to add to the mongo pod
-  initContainers: [ ]
+  initContainers: []
 
   # -- Additional command line arguments to pass to the mongo pod
-  extraArgs: [ ]
+  extraArgs: []
 
   # -- Additional containers to be added to the mongo pod
-  extraContainers: [ ]
+  extraContainers: []
 
   # -- Extra envFrom to pass to the mongodb
   # @default -- `[]`
-  envFrom: [ ]
+  envFrom: []
   # - configMapRef:
   #     name: config-map-name
   # - secretRef:
   #     name: secret-name
 
   # -- Extra environment variables to pass to the mongodb
-  env: [ ]
+  env: []
 
   # -- Additional volumeMounts to the mongodb main container
   volumeMounts:
@@ -925,9 +925,9 @@ mongodb:
   # -- Mongo service configuration
   service:
     # -- Mongo service labels
-    labels: { }
+    labels: {}
     # -- Mongo service annotations
-    annotations: { }
+    annotations: {}
 
 # -- External Database section
 externalDatabase:
