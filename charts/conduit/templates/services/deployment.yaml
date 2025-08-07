@@ -69,15 +69,15 @@ spec:
               {{- toYaml $spec.resources | nindent 12 }}
             {{- end }}
           ports:
-            - containerPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $spec.containerPort }}
+            - containerPort: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
           readinessProbe:
             grpc:
-              port: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $spec.containerPort }}
+              port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
             initialDelaySeconds: 5
             periodSeconds: 5
           livenessProbe:
             grpc:
-              port: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $spec.containerPort }}
+              port: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
             initialDelaySeconds: 20
             periodSeconds: 10
           envFrom:
@@ -102,7 +102,7 @@ spec:
                   key: GRPC_KEY
             {{- end }}
             - name: GRPC_PORT
-              value: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.containerPort | quote }}
+              value: {{ coalesce $specService.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
             {{- if $moduleSettings.env }}
               {{- toYaml $moduleSettings.env | nindent 12 }}
             {{- end }}

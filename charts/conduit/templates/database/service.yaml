@@ -10,13 +10,11 @@ metadata:
     {{- toYaml .Values.database.service.labels | nindent 4 }}
   {{- end }}
   annotations:
-    {{- if .Values.database.metrics.enabled }}
-    {{- if .Values.prometheus.setup }}
+    {{- if and .Values.database.metrics.enabled .Values.prometheus.setup (not .Values.global.enableServiceMonitors) (not .Values.database.metrics.serviceMonitor.enabled) }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.database.metrics.service.port }}"
     prometheus.io/path: /metrics
     prometheus.io/scheme: http
-    {{- end }}
     {{- end }}
     {{- if .Values.database.service.annotations }}
     {{- toYaml .Values.database.service.annotations | nindent 4 }}

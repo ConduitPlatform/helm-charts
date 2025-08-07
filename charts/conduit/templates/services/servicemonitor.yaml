@@ -10,7 +10,7 @@
 apiVersion: {{ $.Values.global.serviceMonitorApi | default "monitoring.coreos.com/v1" }}
 kind: ServiceMonitor
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ default $module $moduleSettings.metrics.serviceMonitor.name $specServiceMonitor.name }}
+  name: {{ template "conduit-helm.fullname" $ }}-{{ coalesce $specServiceMonitor.name $moduleSettings.metrics.serviceMonitor.name $module }}
   {{- if $specServiceMonitor.namespace }}
   namespace: {{ $specServiceMonitor.namespace }}
   {{- else if $moduleSettings.metrics.serviceMonitor.namespace }}

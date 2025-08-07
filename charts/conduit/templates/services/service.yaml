@@ -29,13 +29,11 @@ metadata:
     {{- toYaml $spec.service.annotations | nindent 4 }}
   {{- end }}
   {{- end }}
-  {{- if $spec.metrics.enabled }}
-  {{- if $.Values.prometheus.setup }}
+  {{- if and $spec.metrics.enabled $.Values.prometheus.setup (not $.Values.global.enableServiceMonitors) (not $moduleSettings.metrics.serviceMonitor.enabled) (not $specServiceMonitor.enabled) }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ default $moduleSettings.metrics.service.port $specMetricsService.port }}"
     prometheus.io/path: /metrics
     prometheus.io/scheme: http
-  {{- end }}
   {{- end }}
 spec:
   selector:
@@ -45,7 +43,7 @@ spec:
     - protocol: TCP
       port: {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
       name: tcp
-      targetPort: {{ default $.Values.global.config.grpc_port $moduleSettings.containerPort $specService.grpc_port }}
+      targetPort: {{ coalesce $specService.grpc_port $moduleSettings.containerPort $.Values.global.config.grpc_port }}
 {{- if $spec.metrics.enabled }}
     - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
       name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
