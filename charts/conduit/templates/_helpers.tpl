@@ -82,7 +82,7 @@ Create Mongo name and version as used by the chart label.
 
 {{/*
 Create Conduit core default host.
-*/}} 
+*/}}
 {{- define "conduit-helm.core.default_host" -}}
 {{- if and .Values.core.ingress.enabled .Values.core.ingress.hostName (not .Values.core.ingress.tls) }}
 {{- printf "http://%s" .Values.core.ingress.hostName -}}
@@ -95,7 +95,7 @@ Create Conduit core default host.
 
 {{/*
 Create Conduit router default host.
-*/}} 
+*/}}
 {{- define "conduit-helm.router.default_host" -}}
 {{- if and .Values.router.ingress.enabled .Values.router.ingress.hostName (not .Values.router.ingress.tls) }}
 {{- printf "http://%s" .Values.router.ingress.hostName -}}
@@ -108,7 +108,7 @@ Create Conduit router default host.
 
 {{/*
 Create Conduit API URL which is used by the admin module.
-*/}} 
+*/}}
 {{- define "conduit-helm.conduit.api" -}}
 {{- if and .Values.core.ingress.enabled (not .Values.core.ingress.tls) }}
 {{- printf "http://%s" .Values.core.ingress.hostName -}}
@@ -119,7 +119,7 @@ Create Conduit API URL which is used by the admin module.
 
 {{/*
 Create Conduit URL which is used by the admin module.
-*/}} 
+*/}}
 {{- define "conduit-helm.conduit.url" -}}
 {{- if (not .Values.global.config.conduit_url) -}}
 {{- printf "http://%s.%s.svc.cluster.local:%d" (include "conduit-helm.core.fullname" .) .Release.Namespace (int .Values.core.service.tcp_port) -}}
@@ -130,7 +130,7 @@ Create Conduit URL which is used by the admin module.
 
 {{/*
 Create connection URI for database.
-*/}} 
+*/}}
 {{- define "conduit-helm.db.uri" -}}
 {{- if .Values.mongodb.enabled -}}
 {{- printf "mongodb://%s-mongodb.%s.svc.cluster.local:%d" (include "conduit-helm.fullname" .) .Release.Namespace (int .Values.mongodb.port) | b64enc -}}
@@ -141,7 +141,7 @@ Create connection URI for database.
 
 {{/*
 Create database type variable.
-*/}} 
+*/}}
 {{- define "conduit-helm.db.type" -}}
 {{- if .Values.mongodb.enabled -}}
 {{- printf "mongodb" -}}
@@ -152,7 +152,7 @@ Create database type variable.
 
 {{/*
 Create Master Key secret, by either auto-generating one or using one from Values.
-*/}} 
+*/}}
 {{- define "conduit-helm.master_key" -}}
 {{- if .Values.global.secret.MASTER_KEY -}}
 {{- printf "%s" .Values.global.secret.MASTER_KEY -}}
@@ -188,7 +188,7 @@ Create GRPC Key secret, by either auto-generating one or using one from Values.
 
 {{/*
 Create connection string for loki.
-*/}} 
+*/}}
 {{- define "conduit-helm.loki.url" -}}
 {{- if .Values.loki.setup -}}
 {{- printf "http://loki.%s.svc.cluster.local:%d" .Release.Namespace (int .Values.loki.loki.server.http_listen_port) -}}
@@ -199,7 +199,7 @@ Create connection string for loki.
 
 {{/*
 Create connection string for Prometheus.
-*/}} 
+*/}}
 {{- define "conduit-helm.prometheus.url" -}}
 {{- if .Values.prometheus.setup -}}
 {{- printf "http://%s-prometheus-server.%s.svc.cluster.local:%d" (include "conduit-helm.fullname" .) .Release.Namespace (int .Values.prometheus.server.service.servicePort) -}}
@@ -236,8 +236,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Validate global image tag version (must be 'latest' or >= v0.16.18) */}}
 {{- define "conduit-helm.validateImageTag" -}}
 {{- $tag := default "" .Values.global.image.tag -}}
-{{- if and $tag (not (eq $tag "latest")) (not (eq $tag "dev")) (semverCompare "<v0.16.18" $tag) -}}
-{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest', 'dev' or v0.16.18+" $tag) -}}
+{{- if and $tag (not (eq $tag "latest")) (not (eq $tag "dev")) (not (eq $tag "next")) (semverCompare "<v0.16.18" $tag) -}}
+{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest', 'dev', 'next' or v0.16.18+" $tag) -}}
 {{- end -}}
 {{- end -}}
 
