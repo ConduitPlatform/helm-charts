@@ -819,6 +819,15 @@ redis:
 
   port: 6379
 
+  # -- Persistence for Redis data (AOF + PVC). Recommended so module config/state survives pod restarts.
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+    # -- Leave empty to use cluster default StorageClass
+    storageClass: ""
+
   # -- Init containers to add to the redis pod
   initContainers: []
 

@@ -32,8 +32,14 @@ spec:
           image: {{ .Values.redis.image.name }}:{{ .Values.redis.image.tag }} 
           imagePullPolicy: {{ .Values.redis.image.imagePullPolicy }}
           command:
-            {{- with .Values.redis.extraArgs }}
-              {{- toYaml . | nindent 12 }}
+            {{- if .Values.redis.extraArgs }}
+              {{- toYaml .Values.redis.extraArgs | nindent 12 }}
+            {{- else if .Values.redis.persistence.enabled }}
+            - redis-server
+            - "--appendonly"
+            - "yes"
+            - "--appendfsync"
+            - "everysec"
             {{- end }}
           ports:
             - containerPort: {{ .Values.redis.port }}
@@ -46,6 +52,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            {{- if .Values.redis.persistence.enabled }}
+            - name: redis-data
+              mountPath: /data
+            {{- end }}
             {{- with .Values.redis.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -53,6 +63,11 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
+        {{- if .Values.redis.persistence.enabled }}
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: {{ template "conduit-helm.redis.fullname" . }}-data
+        {{- end }}
         {{- with .Values.redis.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
