@@ -81,6 +81,10 @@ a) Default Mongo image. Set `.Values.mongodb.enabled` to `true`, for this option
 
 b) External Database, Mongo or Postgres. Set the `.Values.externalDatabase.url` along with its type, for this option.
 
+### MongoDB replicas (Atlas)
+
+For deployments with replica sets, connector URI options (for example `readPreference` query parameters on `externalDatabase.url`) define driver-level defaults. After install, operators can tune routing via **Admin UI → Database → Settings** (`readPreference`, `writeConcern`, `readConcern`) or the admin config API; these merge with optional **per-schema** overrides on declared schemas and **per-query** overrides from modules. Defaults match the MongoDB driver (`primary` / `w: 1` / `local`) so upgrades stay non-breaking until you opt in to secondary reads.
+
 3. Loki (optional)
 
 a) Loki chart dependency. Set `.Values.loki.setup` to `true`, for this option.
