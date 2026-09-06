@@ -51,7 +51,7 @@ spec:
 {{- if $spec.metrics.enabled }}
     - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
       name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
-      targetPort: {{ coalesce $specMetricsService.targetPort $specMetricsService.port $moduleSettings.metrics.service.targetPort $.Values.global.config.metrics_port }}
+      targetPort: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort }}
 {{- end }}
   type: ClusterIP
 {{- end }}

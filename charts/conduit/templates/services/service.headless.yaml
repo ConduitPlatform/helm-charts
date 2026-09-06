@@ -41,9 +41,9 @@ spec:
       name: tcp
       targetPort: {{ coalesce $specService.grpc_port $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
 {{- if $spec.metrics.enabled }}
-    - port: {{ coalesce $specMetricsService.targetPort $specMetricsService.port $moduleSettings.metrics.service.targetPort $.Values.global.config.metrics_port }}
+    - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
       name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
-      targetPort: {{ coalesce $specMetricsService.targetPort $specMetricsService.port $moduleSettings.metrics.service.targetPort $.Values.global.config.metrics_port }}
+      targetPort: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort }}
 {{- end }}
 {{- end }}
 {{- end }}

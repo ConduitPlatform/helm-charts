@@ -95,57 +95,7 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 
 ## Embeddings (disabled by default)
 
-Embeddings is an optional module. Keep `install.embeddings.enabled` at `false` until a compatible embeddings image is published and pinned. Chart `appVersion` still tracks the last published Conduit release and does not imply that `conduitplatform/embeddings:<tag>` exists.
-
-### Enablement
-
-1. Confirm Core, Database, and grpc-sdk images are embeddings-compatible, and that an embeddings image exists at the selected tag (`install.embeddings.image.name` is `embeddings`; tag defaults to `global.image.tag`).
-2. Leave `global.secret.grpc_enable` at `true` (the chart default). Production embeddings requires `GRPC_KEY` from `conduit-secret`, the same Secret used by Core, Database, Router, and other modules.
-3. Enable the workload:
-
-```yaml
-install:
-  embeddings:
-    enabled: true
-```
-
-4. Deploy while embeddings config workers stay disabled in module config. Kubernetes gRPC probes only check that the process is serving; they are not a substitute for capability or index readiness.
-
-### Capability and index readiness
-
-Live Atlas, pgvector, Redis, and provider checks are not part of the Helm or unit-test gate. Before activating generation or search:
-
-1. Confirm the embeddings pod is Ready and registered with Core.
-2. Call Database `getVectorCapabilities` (or Admin `GET /embeddings/capabilities`) and confirm the backend can store and query vectors.
-3. Create the embedding config with `enabled: false` if needed. Saving a disabled config may succeed with a capability warning; activation must not.
-4. Create or wait for the vector index until its status is queryable. Do not enable search against a pending or failed index.
-
-### Staged activation
-
-Recommended order:
-
-1. Release compatible Core / Database / grpc-sdk and the embeddings image.
-2. Deploy with `install.embeddings.enabled: true` and module workers still off.
-3. Verify gRPC peer health and vector capabilities.
-4. Configure the HTTPS provider (`allowedHosts`, API key) in embeddings module config.
-5. Create the vector index and wait until it is ready.
-6. Run a bounded backfill (`onlyMissing` where possible).
-7. Execute a scoped canary semantic search.
-8. Enable normal workers and search only after the canary succeeds.
-
-### Resource guidance
-
-Default embeddings requests are `256Mi` / `100m` with limits `1Gi` / `1000m`, gRPC `55165`, and metrics `9192`. Start with `replicas: 1`. Extra replicas multiply BullMQ workers against the shared Redis; raise CPU/memory before replica count if backfills or provider latency saturate the pod. Provider calls, index builds, and backfills are the usual memory drivers.
-
-### Rollback without deleting data
-
-To roll back:
-
-1. Disable embeddings workers / config activation in module config (stop generation and search).
-2. Set `install.embeddings.enabled: false` or scale replicas to `0`, and roll back the embeddings image or chart revision if needed.
-3. Do **not** delete vector fields, indexes, embedding configs, backfill documents, or Redis queue state as part of rollback.
-
-Data and index removal is a separate, explicit operator action after you have confirmed you no longer need them.
+Keep `install.embeddings.enabled` at `false` until a published embeddings image exists at the selected tag. Chart `appVersion` does not imply that `conduitplatform/embeddings:<tag>` exists. Production requires `GRPC_KEY` (`global.secret.grpc_enable`, default `true`). Rolling back the workload must not delete vector fields, indexes, configs, or Redis state.
 
 ## Custom Resource Definition
 

@@ -1,8 +1,8 @@
 {{ $moduleSettings := index .Values "module-settings" }}
 {{- range $module, $spec := .Values.install -}}
 {{- $specService := $spec.service -}}
-{{- $specMetrics := default (dict) $spec.metrics -}}
-{{- $specMetricsService := default (dict) $specMetrics.service -}}
+{{- $specMetrics := $spec.metrics -}}
+{{- $specMetricsService := $spec.metrics.service -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: apps/v1
@@ -82,7 +82,7 @@ spec:
             - containerPort: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
             {{- if $specMetrics.enabled }}
             - name: metrics
-              containerPort: {{ coalesce $specMetricsService.targetPort $specMetricsService.port $moduleSettings.metrics.service.targetPort $.Values.global.config.metrics_port }}
+              containerPort: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort }}
             {{- end }}
           {{- $specReadiness := default (dict) $spec.readinessProbe }}
           {{- $moduleReadiness := default (dict) $moduleSettings.readinessProbe }}
@@ -126,10 +126,10 @@ spec:
                   key: GRPC_KEY
             {{- end }}
             - name: GRPC_PORT
-              value: {{ coalesce $spec.containerPort $specService.grpc_port $specService.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
+              value: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
             {{- if $specMetrics.enabled }}
             - name: METRICS_PORT
-              value: {{ coalesce $specMetricsService.targetPort $specMetricsService.port $moduleSettings.metrics.service.targetPort $.Values.global.config.metrics_port | quote }}
+              value: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort | quote }}
             {{- end }}
             {{- if $moduleSettings.env }}
               {{- toYaml $moduleSettings.env | nindent 12 }}

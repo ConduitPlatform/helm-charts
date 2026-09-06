@@ -145,10 +145,7 @@ install:
     enabled: false
     image:
       name: embeddings
-    # -- gRPC listen port (compose-aligned). Also used for SERVICE_URL and probes.
     containerPort: 55165
-    # -- Keep a single replica unless BullMQ worker concurrency is tuned for horizontal scale.
-    replicas: 1
     resources:
       requests:
         memory: "256Mi"
