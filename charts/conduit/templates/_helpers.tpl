@@ -233,11 +233,23 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Validate global image tag version (must be 'latest' or >= v0.16.18) */}}
+Validate global image tag version (must be 'latest', 'dev', 'next', or >= Chart.AppVersion)
+*/}}
 {{- define "conduit-helm.validateImageTag" -}}
 {{- $tag := default "" .Values.global.image.tag -}}
-{{- if and $tag (not (eq $tag "latest")) (not (eq $tag "dev")) (not (eq $tag "next")) (semverCompare "<v0.16.18" $tag) -}}
-{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest', 'dev', 'next' or v0.16.18+" $tag) -}}
+{{- $min := .Chart.AppVersion -}}
+{{- if and $tag (not (eq $tag "latest")) (not (eq $tag "dev")) (not (eq $tag "next")) (semverCompare (printf "<%s" $min) $tag) -}}
+{{- fail (printf "global.image.tag '%s' is not supported by this chart; use 'latest', 'dev', 'next' or %s+" $tag $min) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Reject embeddings workload without GRPC_KEY
+*/}}
+{{- define "conduit-helm.validateEmbeddings" -}}
+{{- $embeddings := default dict .Values.install.embeddings -}}
+{{- if and $embeddings.enabled (not .Values.global.secret.grpc_enable) -}}
+{{- fail "install.embeddings.enabled=true requires global.secret.grpc_enable=true so GRPC_KEY is mounted" -}}
 {{- end -}}
 {{- end -}}
 

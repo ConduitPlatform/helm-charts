@@ -140,7 +140,7 @@ install:
       name: storage
     metrics:
       enabled: true
-  # -- Embeddings module. Disabled by default until a published embeddings image tag exists.
+  # -- Embeddings workload (not module-config workers). Disabled by default; enable only after a published embeddings image exists at the selected tag. Requires global.secret.grpc_enable=true.
   embeddings:
     enabled: false
     image:

@@ -95,7 +95,13 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 
 ## Embeddings (disabled by default)
 
-Keep `install.embeddings.enabled` at `false` until a published embeddings image exists at the selected tag. Chart `appVersion` does not imply that `conduitplatform/embeddings:<tag>` exists. Production requires `GRPC_KEY` (`global.secret.grpc_enable`, default `true`). Rolling back the workload must not delete vector fields, indexes, configs, or Redis state.
+`install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not the embeddings module-config `enabled` flag that starts generation or search workers.
+
+Keep the workload at `false` until `conduitplatform/embeddings:<tag>` exists at the image tag you will run (`install.embeddings.image.tag`, defaulting to `global.image.tag`). Chart `appVersion` and the default global tag track the last published Conduit release and do **not** imply that an embeddings image exists at that tag. When you enable the workload, set the tag to the first published compatible embeddings release.
+
+Production requires `GRPC_KEY`. Leave `global.secret.grpc_enable` at `true` (the chart default). The chart rejects `install.embeddings.enabled=true` when gRPC secrets are disabled.
+
+Staged rollout: deploy with `install.embeddings.enabled: true` while module-config workers stay disabled, then enable workers only after the pod is running. Rollback the workload with `install.embeddings.enabled: false`. That removes the embeddings Deployment/Service only; vector fields, indexes, embedding configs, and Redis queue state are retained.
 
 ## Custom Resource Definition
 
