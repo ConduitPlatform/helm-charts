@@ -140,6 +140,42 @@ install:
       name: storage
     metrics:
       enabled: true
+  # -- Embeddings module. Disabled by default until a published embeddings image tag exists.
+  embeddings:
+    enabled: false
+    image:
+      name: embeddings
+    # -- gRPC listen port (compose-aligned). Also used for SERVICE_URL and probes.
+    containerPort: 55165
+    # -- Keep a single replica unless BullMQ worker concurrency is tuned for horizontal scale.
+    replicas: 1
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+    readinessProbe:
+      initialDelaySeconds: 15
+      periodSeconds: 5
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 6
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 5
+    service:
+      tcp_port: 55165
+      grpc_port: 55165
+    metrics:
+      enabled: true
+      service:
+        port: 9192
+        targetPort: 9192
 
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:

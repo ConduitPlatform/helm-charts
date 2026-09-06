@@ -27,6 +27,8 @@ install:
     enabled: false
   storage:
     enabled: false
+  embeddings:
+    enabled: false
 module-settings:
   # -- Resource limits and requests
   resources:

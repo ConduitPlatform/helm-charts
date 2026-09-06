@@ -28,3 +28,5 @@ b) External Loki. Set .Values.externalLoki.url to true, for this option.
 
 a) Prometheus chart dependency. Set .Values.prometheus.setup to true, for this option.
 b) External Prometheus. Set .Values.externalPrometheus.url to true, for this option.
+
+Embeddings is disabled by default (install.embeddings.enabled). Do not enable it until a published embeddings image exists at the selected tag. Production requires GRPC_KEY (global.secret.grpc_enable, default true). Rolling back the workload must not delete vector fields, indexes, configs, or Redis state.
