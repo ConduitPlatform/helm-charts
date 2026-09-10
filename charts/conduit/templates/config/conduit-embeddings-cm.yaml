@@ -6,7 +6,24 @@ metadata:
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.fullname" . }}-embeddings
+    conduit.dev/operator-artifact: embeddings-module-config
+  annotations:
+    conduit.dev/apply-path: /config/embeddings
+    conduit.dev/mounted: "false"
 data:
+  APPLY.txt: |-
+    Operator artifact. Not mounted into the embeddings pod. This chart does not PATCH Core.
+
+    After the embeddings module is registered:
+      1. CONFIG=$(kubectl -n {{ .Release.Namespace }} get configmap {{ template "conduit-helm.fullname" . }}-embeddings-config -o jsonpath='{.data.embeddings\.json}')
+      2. Optional: merge decoded conduit-secret key providers.openai-compatible.apiKey into providers["openai-compatible"].apiKey
+      3. PATCH Admin /config/embeddings
+         Header: masterkey: $(kubectl -n {{ .Release.Namespace }} get secret conduit-secret -o jsonpath='{.data.MASTER_KEY}' | base64 -d)
+         Body: {"config": <CONFIG>}
+      4. Read back GET /config/embeddings and confirm non-secret fields match embeddings.json (apiKey is redacted)
+      5. Leave config.enabled false until capability and index checks pass
+
+    Schema-only embeddings do not need Storage. kind=conduit-storage sources require install.storage.enabled=true.
   embeddings.json: |-
 {{ include "conduit-helm.embeddings.moduleConfig" . | indent 4 }}
 {{- end }}

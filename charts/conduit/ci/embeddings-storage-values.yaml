@@ -1,10 +1,10 @@
-# chart-testing: schema-only embeddings (Storage off). Convict workers stay disabled.
+# chart-testing: embeddings + Storage for conduit-storage sources.
 install:
   storage:
-    enabled: false
+    enabled: true
   embeddings:
     enabled: true
-    requireStorage: false
+    requireStorage: true
     image:
       tag: dev
     config:

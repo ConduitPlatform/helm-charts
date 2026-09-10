@@ -244,12 +244,21 @@ Validate global image tag version (must be 'latest', 'dev', 'next', or >= Chart.
 {{- end -}}
 
 {{/*
-Reject embeddings workload without GRPC_KEY and keep convict secrets out of ConfigMap
+Embeddings workload, image, Storage, and convict-limit guards
 */}}
 {{- define "conduit-helm.validateEmbeddings" -}}
-{{- $embeddings := default dict .Values.install.embeddings -}}
-{{- if and $embeddings.enabled (not .Values.global.secret.grpc_enable) -}}
+{{- $root := . -}}
+{{- $embeddings := default dict $root.Values.install.embeddings -}}
+{{- if and $embeddings.enabled (not $root.Values.global.secret.grpc_enable) -}}
 {{- fail "install.embeddings.enabled=true requires global.secret.grpc_enable=true so GRPC_KEY is mounted" -}}
+{{- end -}}
+{{- $embImage := default dict $embeddings.image -}}
+{{- $embTag := default "" $embImage.tag -}}
+{{- if and $embeddings.enabled (or (eq $embTag "") (eq $embTag $root.Chart.AppVersion)) -}}
+{{- fail (printf "install.embeddings.enabled=true requires install.embeddings.image.tag set to a published embeddings image; Chart.appVersion %s does not include embeddings" $root.Chart.AppVersion) -}}
+{{- end -}}
+{{- if and $embeddings.enabled $embeddings.requireStorage (not $root.Values.install.storage.enabled) -}}
+{{- fail "install.embeddings.requireStorage=true requires install.storage.enabled=true for conduit-storage sources; schema-only embeddings can leave requireStorage false" -}}
 {{- end -}}
 {{- $config := default dict $embeddings.config -}}
 {{- if and $config.enabled (not $embeddings.enabled) -}}
@@ -266,14 +275,14 @@ Reject embeddings workload without GRPC_KEY and keep convict secrets out of Conf
 {{- end -}}
 
 {{/*
-Positive-integer checks for embeddings convict limits
+Convict limit checks. chunkOverlapBytes may be zero; other limits must be > 0.
 */}}
 {{- define "conduit-helm.validateEmbeddingsLimits" -}}
 {{- $config := . -}}
 {{- $queue := default dict $config.queue -}}
 {{- $security := default dict $config.security -}}
 {{- $extraction := default dict $config.storageExtraction -}}
-{{- $pairs := dict
+{{- $positive := dict
   "queue.concurrency" $queue.concurrency
   "queue.attempts" $queue.attempts
   "queue.maxBatchSize" $queue.maxBatchSize
@@ -293,26 +302,34 @@ Positive-integer checks for embeddings convict limits
   "storageExtraction.maxPdfPages" $extraction.maxPdfPages
   "storageExtraction.extractTimeoutMs" $extraction.extractTimeoutMs
   "storageExtraction.maxChunksPerFile" $extraction.maxChunksPerFile
-  "storageExtraction.chunkOverlapBytes" $extraction.chunkOverlapBytes
   "storageExtraction.queueConcurrency" $extraction.queueConcurrency
   "storageExtraction.queueAttempts" $extraction.queueAttempts
 -}}
-{{- range $name, $value := $pairs -}}
-{{- if kindIs "float64" $value -}}
-{{- if le ($value | int) 0 -}}
-{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
+{{- range $name, $value := $positive -}}
+{{- include "conduit-helm.assertIntegerBound" (dict "name" $name "value" $value "min" 1) -}}
 {{- end -}}
-{{- else if or (kindIs "int" $value) (kindIs "int64" $value) -}}
-{{- if le ($value | int) 0 -}}
-{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
-{{- end -}}
-{{- else if not (empty $value) -}}
-{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
-{{- end -}}
-{{- end -}}
+{{- include "conduit-helm.assertIntegerBound" (dict "name" "storageExtraction.chunkOverlapBytes" "value" $extraction.chunkOverlapBytes "min" 0) -}}
 {{- $modules := $security.trustedIngestModules -}}
 {{- if and $modules (not (kindIs "slice" $modules)) -}}
 {{- fail "install.embeddings.config.security.trustedIngestModules must be a list of module names" -}}
+{{- end -}}
+{{- range $modules -}}
+{{- if not (regexMatch "^[A-Za-z][A-Za-z0-9_-]{0,63}$" .) -}}
+{{- fail "install.embeddings.config.security.trustedIngestModules entries must be module names" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "conduit-helm.assertIntegerBound" -}}
+{{- $value := .value -}}
+{{- $name := .name -}}
+{{- $min := .min -}}
+{{- if or (kindIs "float64" $value) (kindIs "int" $value) (kindIs "int64" $value) -}}
+{{- if lt ($value | int) ($min | int) -}}
+{{- fail (printf "install.embeddings.config.%s must be an integer >= %d" $name ($min | int)) -}}
+{{- end -}}
+{{- else if not (empty $value) -}}
+{{- fail (printf "install.embeddings.config.%s must be an integer >= %d" $name ($min | int)) -}}
 {{- end -}}
 {{- end -}}
 

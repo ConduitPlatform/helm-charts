@@ -143,8 +143,12 @@ install:
   # -- Embeddings Kubernetes workload, not module-config workers. Disabled by default. Requires global.secret.grpc_enable=true.
   embeddings:
     enabled: false
+    # -- Fail render if Storage is off. Schema-only embeddings leave this false.
+    requireStorage: false
     image:
       name: embeddings
+      # -- Required when enabled. Chart appVersion is not an embeddings image.
+      tag: ""
     containerPort: 55165
     resources:
       requests:

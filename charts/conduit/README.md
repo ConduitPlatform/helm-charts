@@ -97,13 +97,21 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 
 `install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not `install.embeddings.config.enabled` (convict workers/search).
 
-Set `install.embeddings.enabled=true` only after `conduitplatform/embeddings` exists at `install.embeddings.image.tag` (defaults to `global.image.tag`). Chart `appVersion` does not mean that image exists.
+Set `install.embeddings.enabled=true` only after a published `conduitplatform/embeddings` image exists, and set `install.embeddings.image.tag` to that tag. The chart rejects an empty tag or `Chart.appVersion` (currently `v0.16.17`); that appVersion does not include embeddings. `dev` / `next` are for pre-release images only.
 
-Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects `install.embeddings.enabled=true` when gRPC secrets are disabled, and rejects convict `config.enabled=true` unless the workload is also enabled.
+Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects convict `config.enabled=true` unless the workload is also enabled.
 
-`install.embeddings.config` is a Core/Redis convict snapshot rendered to ConfigMap `<release>-conduit-embeddings-config` key `embeddings.json` when the workload is on. The chart does not PATCH Core. After the module registers, apply that JSON with Admin `PATCH /config/embeddings` (body `{ "config": <embeddings.json> }`) or MCP `patch_config_embeddings`. Process env stays `CONDUIT_SERVER`, `SERVICE_URL`, `GRPC_PORT`, `METRICS_PORT`, `LOKI_URL`, and `GRPC_KEY`. Convict has no `env` keys.
+`install.embeddings.config` is rendered to ConfigMap `<release>-conduit-embeddings-config` as an **operator artifact** (`embeddings.json` + `APPLY.txt`). It is not mounted into the pod and the chart does not PATCH Core. After the module registers:
 
-Put `providers.openai-compatible.apiKey` in `install.embeddings.secrets.providers.openai-compatible.apiKey` (b64, same pattern as `global.secret.MASTER_KEY`). It is stored on `conduit-secret` as `providers.openai-compatible.apiKey` and omitted from the ConfigMap. Copy it into Core config; it is not mounted as process env.
+1. `kubectl -n <ns> get configmap <release>-conduit-embeddings-config -o jsonpath='{.data.embeddings\.json}'`
+2. Merge decoded `conduit-secret` key `providers.openai-compatible.apiKey` into `providers["openai-compatible"].apiKey` if present
+3. `PATCH /config/embeddings` with body `{ "config": <json> }` and header `masterkey` (decoded `conduit-secret` `MASTER_KEY`), or MCP `patch_config_embeddings`
+4. `GET /config/embeddings` and confirm non-secret fields match (`apiKey` is redacted)
+5. Leave `config.enabled` false until capability and index checks pass
+
+Process env stays `CONDUIT_SERVER`, `SERVICE_URL`, `GRPC_PORT`, `METRICS_PORT`, `LOKI_URL`, and `GRPC_KEY`. Convict has no `env` keys. Provider `apiKey` stays in `conduit-secret`; it is not mounted as process env.
+
+Schema-only embeddings can run with `install.storage.enabled=false`. `kind=conduit-storage` sources need the Storage module; set `install.embeddings.requireStorage=true` to fail render if Storage is off.
 
 The embeddings image bundles `pdfjs-dist` (~4–8MB) plus BullMQ. PDF extraction runs in a worker thread under `storageExtraction` caps (`maxFileBytes` 8MiB, `maxExtractedBytes` 2MiB, `maxPdfPages` 50, `extractTimeoutMs` 15s). `embeddings-storage-queue` uses `queueConcurrency` (default 1) and `queueAttempts` (default 5). Keep a single replica unless those workers are tuned.
 
@@ -142,7 +150,7 @@ Helm `install.embeddings.config.*` keys match embeddings convict keys (defaults 
 | `install.embeddings.config.storageExtraction.maxPdfPages` | `storageExtraction.maxPdfPages` | `50` |
 | `install.embeddings.config.storageExtraction.extractTimeoutMs` | `storageExtraction.extractTimeoutMs` | `15000` |
 | `install.embeddings.config.storageExtraction.maxChunksPerFile` | `storageExtraction.maxChunksPerFile` | `256` |
-| `install.embeddings.config.storageExtraction.chunkOverlapBytes` | `storageExtraction.chunkOverlapBytes` | `256` |
+| `install.embeddings.config.storageExtraction.chunkOverlapBytes` | `storageExtraction.chunkOverlapBytes` | `256` (zero allowed) |
 | `install.embeddings.config.storageExtraction.queueConcurrency` | `storageExtraction.queueConcurrency` | `1` |
 | `install.embeddings.config.storageExtraction.queueAttempts` | `storageExtraction.queueAttempts` | `5` |
 

@@ -1,0 +1,13 @@
+# chart-testing: backend allows storageExtraction.chunkOverlapBytes=0.
+install:
+  embeddings:
+    enabled: true
+    image:
+      tag: dev
+    config:
+      enabled: false
+      storageExtraction:
+        chunkOverlapBytes: 0
+global:
+  secret:
+    grpc_enable: true

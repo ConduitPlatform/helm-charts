@@ -1,13 +1,12 @@
-# Example overlay: embeddings workload on, convict workers still off.
-# Apply after a compatible conduitplatform/embeddings image tag exists.
-# Requires global.secret.grpc_enable=true (chart default).
+# Example overlay: embeddings + Storage, convict workers still off.
+# Chart.appVersion is not an embeddings image; set image.tag to a published tag
+# (dev/next only for pre-release images).
 #
 # helm upgrade --install conduit ./charts/conduit \
 #   -f values.embeddings.example.yaml \
-#   --set global.image.tag=<published-tag>
+#   --set install.embeddings.image.tag=<published-tag>
 #
-# Then PATCH Admin /config/embeddings with ConfigMap embeddings.json and
-# providers.openai-compatible.apiKey from conduit-secret.
+# Then follow ConfigMap APPLY.txt: PATCH /config/embeddings and GET read-back.
 
 global:
   secret:
@@ -18,6 +17,9 @@ install:
     enabled: true
   embeddings:
     enabled: true
+    requireStorage: true
+    image:
+      tag: dev
     config:
       enabled: false
       defaultProvider: openai-compatible
@@ -62,5 +64,4 @@ install:
     secrets:
       providers:
         openai-compatible:
-          # b64, same contract as global.secret.MASTER_KEY
           apiKey: ""
