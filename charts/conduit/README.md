@@ -97,62 +97,15 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 
 `install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not `install.embeddings.config.enabled` (convict workers/search).
 
-Set `install.embeddings.enabled=true` only after a published `conduitplatform/embeddings` image exists, and set `install.embeddings.image.tag` to that tag. The chart rejects an empty tag or `Chart.appVersion` (currently `v0.16.17`); that appVersion does not include embeddings. `dev` / `next` are for pre-release images only.
+Set `install.embeddings.enabled=true` only after a published `conduitplatform/embeddings` image exists, and set `install.embeddings.image.tag` to that tag. The chart rejects an empty tag or `Chart.appVersion`. `dev` / `next` are for pre-release images only.
 
 Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects convict `config.enabled=true` unless the workload is also enabled.
 
-`install.embeddings.config` is rendered to ConfigMap `<release>-conduit-embeddings-config` as an **operator artifact** (`embeddings.json` + `APPLY.txt`). It is not mounted into the pod and the chart does not PATCH Core. After the module registers:
+`install.embeddings.config` is rendered to ConfigMap `<release>-conduit-embeddings-config` (`embeddings.json` + `APPLY.txt`). It is not mounted and the chart does not PATCH Core. After the module registers, follow APPLY.txt: PATCH `/config/embeddings`, then GET read-back. Provider `apiKey` belongs in `install.embeddings.secrets.providers.openai-compatible.apiKey` (`conduit-secret`).
 
-1. `kubectl -n <ns> get configmap <release>-conduit-embeddings-config -o jsonpath='{.data.embeddings\.json}'`
-2. Merge decoded `conduit-secret` key `providers.openai-compatible.apiKey` into `providers["openai-compatible"].apiKey` if present
-3. `PATCH /config/embeddings` with body `{ "config": <json> }` and header `masterkey` (decoded `conduit-secret` `MASTER_KEY`), or MCP `patch_config_embeddings`
-4. `GET /config/embeddings` and confirm non-secret fields match (`apiKey` is redacted)
-5. Leave `config.enabled` false until capability and index checks pass
+Schema-only embeddings can run with `install.storage.enabled=false`. `kind=conduit-storage` sources need Storage; set `install.embeddings.requireStorage=true` to fail render if Storage is off.
 
-Process env stays `CONDUIT_SERVER`, `SERVICE_URL`, `GRPC_PORT`, `METRICS_PORT`, `LOKI_URL`, and `GRPC_KEY`. Convict has no `env` keys. Provider `apiKey` stays in `conduit-secret`; it is not mounted as process env.
-
-Schema-only embeddings can run with `install.storage.enabled=false`. `kind=conduit-storage` sources need the Storage module; set `install.embeddings.requireStorage=true` to fail render if Storage is off.
-
-The embeddings image bundles `pdfjs-dist` (~4–8MB) plus BullMQ. PDF extraction runs in a worker thread under `storageExtraction` caps (`maxFileBytes` 8MiB, `maxExtractedBytes` 2MiB, `maxPdfPages` 50, `extractTimeoutMs` 15s). `embeddings-storage-queue` uses `queueConcurrency` (default 1) and `queueAttempts` (default 5). Keep a single replica unless those workers are tuned.
-
-`POST /embeddings/sources/:id/reconcile` backfills missed Storage events; this chart does not run that Job. Schema backfills remain `POST /embeddings/backfills`. Office and OCR are not extracted in-cluster; custom modules must call trusted ingest (`POST /embeddings/sources/:id/documents`) and be listed in `security.trustedIngestModules`.
-
-Example overlay: [values.embeddings.example.yaml](./values.embeddings.example.yaml). `install.embeddings.enabled: false` removes the Deployment/Service/ConfigMap; vector fields, indexes, embedding configs, source documents, and Redis queue state are retained.
-
-Helm `install.embeddings.config.*` keys match embeddings convict keys (defaults from `modules/embeddings/src/config/index.ts`):
-
-| Helm value | Convict key | Default |
-|-----|------|---------|
-| `install.embeddings.config.enabled` | `enabled` | `false` |
-| `install.embeddings.config.defaultProvider` | `defaultProvider` | `openai-compatible` |
-| `install.embeddings.config.providers.openai-compatible.endpoint` | `providers.openai-compatible.endpoint` | `""` |
-| `install.embeddings.config.providers.openai-compatible.models` | `providers.openai-compatible.models` | `[]` |
-| `install.embeddings.config.providers.openai-compatible.defaultModel` | `providers.openai-compatible.defaultModel` | `""` |
-| `install.embeddings.secrets.providers.openai-compatible.apiKey` | `providers.openai-compatible.apiKey` (Secret only) | empty |
-| `install.embeddings.config.queue.concurrency` | `queue.concurrency` | `2` |
-| `install.embeddings.config.queue.attempts` | `queue.attempts` | `3` |
-| `install.embeddings.config.queue.maxBatchSize` | `queue.maxBatchSize` | `500` |
-| `install.embeddings.config.queue.drainTimeoutMs` | `queue.drainTimeoutMs` | `900000` |
-| `install.embeddings.config.security.sourceFieldAllowlist` | `security.sourceFieldAllowlist` | `[]` |
-| `install.embeddings.config.security.maxMutationEventIds` | `security.maxMutationEventIds` | `500` |
-| `install.embeddings.config.security.embedTimeoutMs` | `security.embedTimeoutMs` | `10000` |
-| `install.embeddings.config.security.maxEmbedInputBytes` | `security.maxEmbedInputBytes` | `32768` |
-| `install.embeddings.config.security.maxEmbedResponseBytes` | `security.maxEmbedResponseBytes` | `1048576` |
-| `install.embeddings.config.security.trustedIngestModules` | `security.trustedIngestModules` | `database`, `core`, `storage`, `embeddings` |
-| `install.embeddings.config.security.maxIngestBatchSize` | `security.maxIngestBatchSize` | `100` |
-| `install.embeddings.config.security.maxChunksPerDocument` | `security.maxChunksPerDocument` | `256` |
-| `install.embeddings.config.security.maxChunkTextBytes` | `security.maxChunkTextBytes` | `32768` |
-| `install.embeddings.config.security.maxMetadataBytes` | `security.maxMetadataBytes` | `4096` |
-| `install.embeddings.config.security.maxReferenceBytes` | `security.maxReferenceBytes` | `1024` |
-| `install.embeddings.config.security.sourceSearchMaxLimit` | `security.sourceSearchMaxLimit` | `100` |
-| `install.embeddings.config.storageExtraction.maxFileBytes` | `storageExtraction.maxFileBytes` | `8388608` |
-| `install.embeddings.config.storageExtraction.maxExtractedBytes` | `storageExtraction.maxExtractedBytes` | `2097152` |
-| `install.embeddings.config.storageExtraction.maxPdfPages` | `storageExtraction.maxPdfPages` | `50` |
-| `install.embeddings.config.storageExtraction.extractTimeoutMs` | `storageExtraction.extractTimeoutMs` | `15000` |
-| `install.embeddings.config.storageExtraction.maxChunksPerFile` | `storageExtraction.maxChunksPerFile` | `256` |
-| `install.embeddings.config.storageExtraction.chunkOverlapBytes` | `storageExtraction.chunkOverlapBytes` | `256` (zero allowed) |
-| `install.embeddings.config.storageExtraction.queueConcurrency` | `storageExtraction.queueConcurrency` | `1` |
-| `install.embeddings.config.storageExtraction.queueAttempts` | `storageExtraction.queueAttempts` | `5` |
+Convict keys live under `install.embeddings.config` (see `values.yaml`). Example overlay: [values.embeddings.example.yaml](./values.embeddings.example.yaml). `install.embeddings.enabled: false` removes the Deployment/Service/ConfigMap; vector fields, indexes, embedding configs, source documents, and Redis queue state are retained.
 
 ## Custom Resource Definition
 

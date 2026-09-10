@@ -247,18 +247,17 @@ Validate global image tag version (must be 'latest', 'dev', 'next', or >= Chart.
 Embeddings workload, image, Storage, and convict-limit guards
 */}}
 {{- define "conduit-helm.validateEmbeddings" -}}
-{{- $root := . -}}
-{{- $embeddings := default dict $root.Values.install.embeddings -}}
-{{- if and $embeddings.enabled (not $root.Values.global.secret.grpc_enable) -}}
+{{- $embeddings := default dict .Values.install.embeddings -}}
+{{- if and $embeddings.enabled (not .Values.global.secret.grpc_enable) -}}
 {{- fail "install.embeddings.enabled=true requires global.secret.grpc_enable=true so GRPC_KEY is mounted" -}}
 {{- end -}}
 {{- $embImage := default dict $embeddings.image -}}
 {{- $embTag := default "" $embImage.tag -}}
-{{- if and $embeddings.enabled (or (eq $embTag "") (eq $embTag $root.Chart.AppVersion)) -}}
-{{- fail (printf "install.embeddings.enabled=true requires install.embeddings.image.tag set to a published embeddings image; Chart.appVersion %s does not include embeddings" $root.Chart.AppVersion) -}}
+{{- if and $embeddings.enabled (or (eq $embTag "") (eq $embTag .Chart.AppVersion)) -}}
+{{- fail (printf "install.embeddings.enabled=true requires install.embeddings.image.tag set to a published embeddings image; Chart.appVersion %s does not include embeddings" .Chart.AppVersion) -}}
 {{- end -}}
-{{- if and $embeddings.enabled $embeddings.requireStorage (not $root.Values.install.storage.enabled) -}}
-{{- fail "install.embeddings.requireStorage=true requires install.storage.enabled=true for conduit-storage sources; schema-only embeddings can leave requireStorage false" -}}
+{{- if and $embeddings.enabled $embeddings.requireStorage (not .Values.install.storage.enabled) -}}
+{{- fail "install.embeddings.requireStorage=true requires install.storage.enabled=true" -}}
 {{- end -}}
 {{- $config := default dict $embeddings.config -}}
 {{- if and $config.enabled (not $embeddings.enabled) -}}

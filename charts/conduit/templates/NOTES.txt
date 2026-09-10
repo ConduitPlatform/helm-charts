@@ -33,12 +33,10 @@ b) External Prometheus. Set .Values.externalPrometheus.url to true, for this opt
 
 install.embeddings.enabled deploys the Kubernetes workload only; it is not install.embeddings.config.enabled (convict workers/search).
 
-Requires install.embeddings.image.tag set to a published embeddings image. Chart appVersion does not include embeddings; inheriting global.image.tag / appVersion is rejected. Requires global.secret.grpc_enable=true (GRPC_KEY).
+Requires install.embeddings.image.tag set to a published embeddings image (Chart.appVersion is rejected) and global.secret.grpc_enable=true (GRPC_KEY).
 
-ConfigMap *-embeddings-config is an operator artifact (not mounted). After the module registers, follow its APPLY.txt: PATCH Admin /config/embeddings with embeddings.json, then GET /config/embeddings to read back. The chart does not PATCH Core. Provider apiKey stays in conduit-secret as providers.openai-compatible.apiKey.
+ConfigMap *-embeddings-config is an operator artifact (not mounted). Follow APPLY.txt to PATCH /config/embeddings and GET read-back. Provider apiKey stays in conduit-secret.
 
 Schema-only embeddings can run with install.storage.enabled=false. kind=conduit-storage sources need Storage; set install.embeddings.requireStorage=true to fail render if Storage is off.
-
-pdfjs-dist (~4-8MB) plus BullMQ ship in the embeddings image. Reconcile is POST /embeddings/sources/:id/reconcile (not a Helm Job). Office/OCR stay on trusted custom-module ingest.
 
 Rollback with install.embeddings.enabled=false; vector fields, indexes, embedding configs, source documents, and Redis queue state are retained.

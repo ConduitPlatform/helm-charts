@@ -1,12 +1,10 @@
-# Example overlay: embeddings + Storage, convict workers still off.
-# Chart.appVersion is not an embeddings image; set image.tag to a published tag
-# (dev/next only for pre-release images).
+# Overlay: embeddings + Storage, convict workers still off.
+# Set image.tag to a published embeddings tag (not Chart.appVersion).
+# Then follow ConfigMap APPLY.txt: PATCH /config/embeddings and GET read-back.
 #
 # helm upgrade --install conduit ./charts/conduit \
 #   -f values.embeddings.example.yaml \
 #   --set install.embeddings.image.tag=<published-tag>
-#
-# Then follow ConfigMap APPLY.txt: PATCH /config/embeddings and GET read-back.
 
 global:
   secret:
@@ -21,8 +19,6 @@ install:
     image:
       tag: dev
     config:
-      enabled: false
-      defaultProvider: openai-compatible
       providers:
         openai-compatible:
           endpoint: "https://api.openai.com/v1/embeddings"
@@ -30,38 +26,3 @@ install:
             - name: text-embedding-3-small
               dimensions: 1536
           defaultModel: text-embedding-3-small
-      queue:
-        concurrency: 2
-        attempts: 3
-        maxBatchSize: 500
-        drainTimeoutMs: 900000
-      security:
-        sourceFieldAllowlist: []
-        maxMutationEventIds: 500
-        embedTimeoutMs: 10000
-        maxEmbedInputBytes: 32768
-        maxEmbedResponseBytes: 1048576
-        trustedIngestModules:
-          - database
-          - core
-          - storage
-          - embeddings
-        maxIngestBatchSize: 100
-        maxChunksPerDocument: 256
-        maxChunkTextBytes: 32768
-        maxMetadataBytes: 4096
-        maxReferenceBytes: 1024
-        sourceSearchMaxLimit: 100
-      storageExtraction:
-        maxFileBytes: 8388608
-        maxExtractedBytes: 2097152
-        maxPdfPages: 50
-        extractTimeoutMs: 15000
-        maxChunksPerFile: 256
-        chunkOverlapBytes: 256
-        queueConcurrency: 1
-        queueAttempts: 5
-    secrets:
-      providers:
-        openai-compatible:
-          apiKey: ""
