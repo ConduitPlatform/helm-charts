@@ -1,0 +1,12 @@
+{{- if .Values.install.embeddings.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "conduit-helm.fullname" . }}-embeddings-config
+  labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app: {{ template "conduit-helm.fullname" . }}-embeddings
+data:
+  embeddings.json: |-
+{{ include "conduit-helm.embeddings.moduleConfig" . | indent 4 }}
+{{- end }}

@@ -244,13 +244,100 @@ Validate global image tag version (must be 'latest', 'dev', 'next', or >= Chart.
 {{- end -}}
 
 {{/*
-Reject embeddings workload without GRPC_KEY
+Reject embeddings workload without GRPC_KEY and keep convict secrets out of ConfigMap
 */}}
 {{- define "conduit-helm.validateEmbeddings" -}}
 {{- $embeddings := default dict .Values.install.embeddings -}}
 {{- if and $embeddings.enabled (not .Values.global.secret.grpc_enable) -}}
 {{- fail "install.embeddings.enabled=true requires global.secret.grpc_enable=true so GRPC_KEY is mounted" -}}
 {{- end -}}
+{{- $config := default dict $embeddings.config -}}
+{{- if and $config.enabled (not $embeddings.enabled) -}}
+{{- fail "install.embeddings.config.enabled=true requires install.embeddings.enabled=true" -}}
+{{- end -}}
+{{- $providers := default dict $config.providers -}}
+{{- $openai := default dict (index $providers "openai-compatible") -}}
+{{- if $openai.apiKey -}}
+{{- fail "install.embeddings.config.providers.openai-compatible.apiKey is not allowed; set install.embeddings.secrets.providers.openai-compatible.apiKey" -}}
+{{- end -}}
+{{- if $embeddings.enabled -}}
+{{- include "conduit-helm.validateEmbeddingsLimits" $config -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Positive-integer checks for embeddings convict limits
+*/}}
+{{- define "conduit-helm.validateEmbeddingsLimits" -}}
+{{- $config := . -}}
+{{- $queue := default dict $config.queue -}}
+{{- $security := default dict $config.security -}}
+{{- $extraction := default dict $config.storageExtraction -}}
+{{- $pairs := dict
+  "queue.concurrency" $queue.concurrency
+  "queue.attempts" $queue.attempts
+  "queue.maxBatchSize" $queue.maxBatchSize
+  "queue.drainTimeoutMs" $queue.drainTimeoutMs
+  "security.maxMutationEventIds" $security.maxMutationEventIds
+  "security.embedTimeoutMs" $security.embedTimeoutMs
+  "security.maxEmbedInputBytes" $security.maxEmbedInputBytes
+  "security.maxEmbedResponseBytes" $security.maxEmbedResponseBytes
+  "security.maxIngestBatchSize" $security.maxIngestBatchSize
+  "security.maxChunksPerDocument" $security.maxChunksPerDocument
+  "security.maxChunkTextBytes" $security.maxChunkTextBytes
+  "security.maxMetadataBytes" $security.maxMetadataBytes
+  "security.maxReferenceBytes" $security.maxReferenceBytes
+  "security.sourceSearchMaxLimit" $security.sourceSearchMaxLimit
+  "storageExtraction.maxFileBytes" $extraction.maxFileBytes
+  "storageExtraction.maxExtractedBytes" $extraction.maxExtractedBytes
+  "storageExtraction.maxPdfPages" $extraction.maxPdfPages
+  "storageExtraction.extractTimeoutMs" $extraction.extractTimeoutMs
+  "storageExtraction.maxChunksPerFile" $extraction.maxChunksPerFile
+  "storageExtraction.chunkOverlapBytes" $extraction.chunkOverlapBytes
+  "storageExtraction.queueConcurrency" $extraction.queueConcurrency
+  "storageExtraction.queueAttempts" $extraction.queueAttempts
+-}}
+{{- range $name, $value := $pairs -}}
+{{- if kindIs "float64" $value -}}
+{{- if le ($value | int) 0 -}}
+{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
+{{- end -}}
+{{- else if or (kindIs "int" $value) (kindIs "int64" $value) -}}
+{{- if le ($value | int) 0 -}}
+{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
+{{- end -}}
+{{- else if not (empty $value) -}}
+{{- fail (printf "install.embeddings.config.%s must be a positive integer" $name) -}}
+{{- end -}}
+{{- end -}}
+{{- $modules := $security.trustedIngestModules -}}
+{{- if and $modules (not (kindIs "slice" $modules)) -}}
+{{- fail "install.embeddings.config.security.trustedIngestModules must be a list of module names" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Embeddings Core module config JSON (convict keys, secrets omitted)
+*/}}
+{{- define "conduit-helm.embeddings.moduleConfig" -}}
+{{- $config := deepCopy (default dict .Values.install.embeddings.config) -}}
+{{- $providers := default dict $config.providers -}}
+{{- $openai := default dict (index $providers "openai-compatible") -}}
+{{- $_ := unset $openai "apiKey" -}}
+{{- $_ := set $providers "openai-compatible" $openai -}}
+{{- $_ := set $config "providers" $providers -}}
+{{- $config | toPrettyJson }}
+{{- end -}}
+
+{{/*
+Optional b64 OpenAI-compatible provider API key from values
+*/}}
+{{- define "conduit-helm.embeddings.providerApiKey" -}}
+{{- $embeddings := default dict .Values.install.embeddings -}}
+{{- $secrets := default dict $embeddings.secrets -}}
+{{- $providers := default dict $secrets.providers -}}
+{{- $openai := default dict (index $providers "openai-compatible") -}}
+{{- if $openai.apiKey -}}{{ $openai.apiKey }}{{- end -}}
 {{- end -}}
 
 {{/*

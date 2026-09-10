@@ -1,0 +1,10 @@
+# chart-testing overlay: render embeddings workload + config ConfigMap.
+# Convict workers stay disabled. Dependencies stay on chart defaults.
+install:
+  embeddings:
+    enabled: true
+    config:
+      enabled: false
+global:
+  secret:
+    grpc_enable: true

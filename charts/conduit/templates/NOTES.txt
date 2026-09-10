@@ -31,8 +31,12 @@ b) External Prometheus. Set .Values.externalPrometheus.url to true, for this opt
 
 5. Embeddings (optional, disabled by default)
 
-install.embeddings.enabled deploys the Kubernetes workload only; it is not the embeddings module-config enabled flag that starts generation/search workers.
+install.embeddings.enabled deploys the Kubernetes workload only; it is not install.embeddings.config.enabled (convict workers/search).
 
 Set install.embeddings.enabled=true only after conduitplatform/embeddings exists at the chosen image tag (install.embeddings.image.tag, defaulting to global.image.tag). Chart appVersion does not mean that image exists.
 
-Requires global.secret.grpc_enable=true (GRPC_KEY). Roll out with module-config workers still disabled. Rollback with install.embeddings.enabled=false; vector fields, indexes, embedding configs, and Redis state are retained.
+Requires global.secret.grpc_enable=true (GRPC_KEY). Roll out with config.enabled still false. Apply ConfigMap embeddings.json via Admin PATCH /config/embeddings after the module registers; the chart does not PATCH Core. Provider apiKey stays in conduit-secret as providers.openai-compatible.apiKey.
+
+pdfjs-dist (~4-8MB) plus BullMQ ship in the embeddings image. Storage extraction uses embeddings-storage-queue and storageExtraction caps. Reconcile is POST /embeddings/sources/:id/reconcile (not a Helm Job). Office/OCR stay on trusted custom-module ingest.
+
+Rollback with install.embeddings.enabled=false; vector fields, indexes, embedding configs, source documents, and Redis queue state are retained.

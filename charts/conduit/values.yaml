@@ -173,6 +173,52 @@ install:
       service:
         port: 9192
         targetPort: 9192
+    # -- Core module convict config snapshot (Redis/Admin), not process env. Chart does not PATCH Core.
+    # Provider apiKey belongs in secrets.providers["openai-compatible"].apiKey (conduit-secret).
+    config:
+      enabled: false
+      defaultProvider: openai-compatible
+      providers:
+        openai-compatible:
+          endpoint: ""
+          models: []
+          defaultModel: ""
+      queue:
+        concurrency: 2
+        attempts: 3
+        maxBatchSize: 500
+        drainTimeoutMs: 900000
+      security:
+        sourceFieldAllowlist: []
+        maxMutationEventIds: 500
+        embedTimeoutMs: 10000
+        maxEmbedInputBytes: 32768
+        maxEmbedResponseBytes: 1048576
+        trustedIngestModules:
+          - database
+          - core
+          - storage
+          - embeddings
+        maxIngestBatchSize: 100
+        maxChunksPerDocument: 256
+        maxChunkTextBytes: 32768
+        maxMetadataBytes: 4096
+        maxReferenceBytes: 1024
+        sourceSearchMaxLimit: 100
+      storageExtraction:
+        maxFileBytes: 8388608
+        maxExtractedBytes: 2097152
+        maxPdfPages: 50
+        extractTimeoutMs: 15000
+        maxChunksPerFile: 256
+        chunkOverlapBytes: 256
+        queueConcurrency: 1
+        queueAttempts: 5
+    secrets:
+      providers:
+        openai-compatible:
+          # -- Optional b64 provider API key. Stored in conduit-secret; omitted from ConfigMap.
+          apiKey: ""
 
 # -- Default module settings for the microservices (except Admin-UI, Core, Database, Router)
 module-settings:

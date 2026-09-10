@@ -95,13 +95,56 @@ b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this
 
 ## Embeddings (disabled by default)
 
-`install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not the embeddings module-config `enabled` flag that starts generation or search workers.
+`install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not `install.embeddings.config.enabled` (convict workers/search).
 
 Set `install.embeddings.enabled=true` only after `conduitplatform/embeddings` exists at `install.embeddings.image.tag` (defaults to `global.image.tag`). Chart `appVersion` does not mean that image exists.
 
-Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects `install.embeddings.enabled=true` when gRPC secrets are disabled.
+Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects `install.embeddings.enabled=true` when gRPC secrets are disabled, and rejects convict `config.enabled=true` unless the workload is also enabled.
 
-Deploy the workload with module-config workers still disabled, then enable workers after the pod is running. `install.embeddings.enabled: false` removes the Deployment/Service; vector fields, indexes, embedding configs, and Redis queue state are retained.
+`install.embeddings.config` is a Core/Redis convict snapshot rendered to ConfigMap `<release>-conduit-embeddings-config` key `embeddings.json` when the workload is on. The chart does not PATCH Core. After the module registers, apply that JSON with Admin `PATCH /config/embeddings` (body `{ "config": <embeddings.json> }`) or MCP `patch_config_embeddings`. Process env stays `CONDUIT_SERVER`, `SERVICE_URL`, `GRPC_PORT`, `METRICS_PORT`, `LOKI_URL`, and `GRPC_KEY`. Convict has no `env` keys.
+
+Put `providers.openai-compatible.apiKey` in `install.embeddings.secrets.providers.openai-compatible.apiKey` (b64, same pattern as `global.secret.MASTER_KEY`). It is stored on `conduit-secret` as `providers.openai-compatible.apiKey` and omitted from the ConfigMap. Copy it into Core config; it is not mounted as process env.
+
+The embeddings image bundles `pdfjs-dist` (~4–8MB) plus BullMQ. PDF extraction runs in a worker thread under `storageExtraction` caps (`maxFileBytes` 8MiB, `maxExtractedBytes` 2MiB, `maxPdfPages` 50, `extractTimeoutMs` 15s). `embeddings-storage-queue` uses `queueConcurrency` (default 1) and `queueAttempts` (default 5). Keep a single replica unless those workers are tuned.
+
+`POST /embeddings/sources/:id/reconcile` backfills missed Storage events; this chart does not run that Job. Schema backfills remain `POST /embeddings/backfills`. Office and OCR are not extracted in-cluster; custom modules must call trusted ingest (`POST /embeddings/sources/:id/documents`) and be listed in `security.trustedIngestModules`.
+
+Example overlay: [values.embeddings.example.yaml](./values.embeddings.example.yaml). `install.embeddings.enabled: false` removes the Deployment/Service/ConfigMap; vector fields, indexes, embedding configs, source documents, and Redis queue state are retained.
+
+Helm `install.embeddings.config.*` keys match embeddings convict keys (defaults from `modules/embeddings/src/config/index.ts`):
+
+| Helm value | Convict key | Default |
+|-----|------|---------|
+| `install.embeddings.config.enabled` | `enabled` | `false` |
+| `install.embeddings.config.defaultProvider` | `defaultProvider` | `openai-compatible` |
+| `install.embeddings.config.providers.openai-compatible.endpoint` | `providers.openai-compatible.endpoint` | `""` |
+| `install.embeddings.config.providers.openai-compatible.models` | `providers.openai-compatible.models` | `[]` |
+| `install.embeddings.config.providers.openai-compatible.defaultModel` | `providers.openai-compatible.defaultModel` | `""` |
+| `install.embeddings.secrets.providers.openai-compatible.apiKey` | `providers.openai-compatible.apiKey` (Secret only) | empty |
+| `install.embeddings.config.queue.concurrency` | `queue.concurrency` | `2` |
+| `install.embeddings.config.queue.attempts` | `queue.attempts` | `3` |
+| `install.embeddings.config.queue.maxBatchSize` | `queue.maxBatchSize` | `500` |
+| `install.embeddings.config.queue.drainTimeoutMs` | `queue.drainTimeoutMs` | `900000` |
+| `install.embeddings.config.security.sourceFieldAllowlist` | `security.sourceFieldAllowlist` | `[]` |
+| `install.embeddings.config.security.maxMutationEventIds` | `security.maxMutationEventIds` | `500` |
+| `install.embeddings.config.security.embedTimeoutMs` | `security.embedTimeoutMs` | `10000` |
+| `install.embeddings.config.security.maxEmbedInputBytes` | `security.maxEmbedInputBytes` | `32768` |
+| `install.embeddings.config.security.maxEmbedResponseBytes` | `security.maxEmbedResponseBytes` | `1048576` |
+| `install.embeddings.config.security.trustedIngestModules` | `security.trustedIngestModules` | `database`, `core`, `storage`, `embeddings` |
+| `install.embeddings.config.security.maxIngestBatchSize` | `security.maxIngestBatchSize` | `100` |
+| `install.embeddings.config.security.maxChunksPerDocument` | `security.maxChunksPerDocument` | `256` |
+| `install.embeddings.config.security.maxChunkTextBytes` | `security.maxChunkTextBytes` | `32768` |
+| `install.embeddings.config.security.maxMetadataBytes` | `security.maxMetadataBytes` | `4096` |
+| `install.embeddings.config.security.maxReferenceBytes` | `security.maxReferenceBytes` | `1024` |
+| `install.embeddings.config.security.sourceSearchMaxLimit` | `security.sourceSearchMaxLimit` | `100` |
+| `install.embeddings.config.storageExtraction.maxFileBytes` | `storageExtraction.maxFileBytes` | `8388608` |
+| `install.embeddings.config.storageExtraction.maxExtractedBytes` | `storageExtraction.maxExtractedBytes` | `2097152` |
+| `install.embeddings.config.storageExtraction.maxPdfPages` | `storageExtraction.maxPdfPages` | `50` |
+| `install.embeddings.config.storageExtraction.extractTimeoutMs` | `storageExtraction.extractTimeoutMs` | `15000` |
+| `install.embeddings.config.storageExtraction.maxChunksPerFile` | `storageExtraction.maxChunksPerFile` | `256` |
+| `install.embeddings.config.storageExtraction.chunkOverlapBytes` | `storageExtraction.chunkOverlapBytes` | `256` |
+| `install.embeddings.config.storageExtraction.queueConcurrency` | `storageExtraction.queueConcurrency` | `1` |
+| `install.embeddings.config.storageExtraction.queueAttempts` | `storageExtraction.queueAttempts` | `5` |
 
 ## Custom Resource Definition
 

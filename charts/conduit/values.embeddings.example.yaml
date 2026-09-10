@@ -1,0 +1,66 @@
+# Example overlay: embeddings workload on, convict workers still off.
+# Apply after a compatible conduitplatform/embeddings image tag exists.
+# Requires global.secret.grpc_enable=true (chart default).
+#
+# helm upgrade --install conduit ./charts/conduit \
+#   -f values.embeddings.example.yaml \
+#   --set global.image.tag=<published-tag>
+#
+# Then PATCH Admin /config/embeddings with ConfigMap embeddings.json and
+# providers.openai-compatible.apiKey from conduit-secret.
+
+global:
+  secret:
+    grpc_enable: true
+
+install:
+  storage:
+    enabled: true
+  embeddings:
+    enabled: true
+    config:
+      enabled: false
+      defaultProvider: openai-compatible
+      providers:
+        openai-compatible:
+          endpoint: "https://api.openai.com/v1/embeddings"
+          models:
+            - name: text-embedding-3-small
+              dimensions: 1536
+          defaultModel: text-embedding-3-small
+      queue:
+        concurrency: 2
+        attempts: 3
+        maxBatchSize: 500
+        drainTimeoutMs: 900000
+      security:
+        sourceFieldAllowlist: []
+        maxMutationEventIds: 500
+        embedTimeoutMs: 10000
+        maxEmbedInputBytes: 32768
+        maxEmbedResponseBytes: 1048576
+        trustedIngestModules:
+          - database
+          - core
+          - storage
+          - embeddings
+        maxIngestBatchSize: 100
+        maxChunksPerDocument: 256
+        maxChunkTextBytes: 32768
+        maxMetadataBytes: 4096
+        maxReferenceBytes: 1024
+        sourceSearchMaxLimit: 100
+      storageExtraction:
+        maxFileBytes: 8388608
+        maxExtractedBytes: 2097152
+        maxPdfPages: 50
+        extractTimeoutMs: 15000
+        maxChunksPerFile: 256
+        chunkOverlapBytes: 256
+        queueConcurrency: 1
+        queueAttempts: 5
+    secrets:
+      providers:
+        openai-compatible:
+          # b64, same contract as global.secret.MASTER_KEY
+          apiKey: ""
