@@ -1,1 +1,2 @@
 {{- include "conduit-helm.validateImageTag" . -}}
+{{- include "conduit-helm.validateEmbeddings" . -}}

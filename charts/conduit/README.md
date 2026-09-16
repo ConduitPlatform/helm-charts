@@ -1,6 +1,6 @@
 # Conduit
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.14.7](https://img.shields.io/badge/AppVersion-0.14.7-informational?style=flat-square)
+![Version: 0.2.10](https://img.shields.io/badge/Version-0.2.10-informational?style=flat-square)  ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)  ![AppVersion: v0.16.17](https://img.shields.io/badge/AppVersion-v0.16.17-informational?style=flat-square)
 
 Conduit is a NodeJS-based Self-Hosted backend, that aims to cut down development times by providing ready-made modules that offer common functionality out of the box, and allowing maximum flexibility to add custom functionality.
 
@@ -81,10 +81,6 @@ a) Default Mongo image. Set `.Values.mongodb.enabled` to `true`, for this option
 
 b) External Database, Mongo or Postgres. Set the `.Values.externalDatabase.url` along with its type, for this option.
 
-### MongoDB replicas (Atlas)
-
-For deployments with replica sets, connector URI options (for example `readPreference` query parameters on `externalDatabase.url`) define driver-level defaults. After install, operators can tune routing via **Admin UI → Database → Settings** (`readPreference`, `writeConcern`, `readConcern`) or the admin config API; these merge with optional **per-schema** overrides on declared schemas and **per-query** overrides from modules. Defaults match the MongoDB driver (`primary` / `w: 1` / `local`) so upgrades stay non-breaking until you opt in to secondary reads.
-
 3. Loki (optional)
 
 a) Loki chart dependency. Set `.Values.loki.setup` to `true`, for this option.
@@ -96,6 +92,16 @@ b) External Loki. Set `.Values.externalLoki.url` to `true`, for this option.
 a) Prometheus chart dependency. Set `.Values.prometheus.setup` to `true`, for this option.
 
 b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this option.
+
+## Embeddings (disabled by default)
+
+`install.embeddings.enabled` deploys the embeddings Kubernetes workload only. It is not the embeddings module-config `enabled` flag that starts generation or search workers.
+
+Set `install.embeddings.enabled=true` only after `conduitplatform/embeddings` exists at `install.embeddings.image.tag` (defaults to `global.image.tag`). Chart `appVersion` does not mean that image exists.
+
+Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects `install.embeddings.enabled=true` when gRPC secrets are disabled.
+
+Deploy the workload with module-config workers still disabled, then enable workers after the pod is running. `install.embeddings.enabled: false` removes the Deployment/Service; vector fields, indexes, embedding configs, and Redis queue state are retained.
 
 ## Custom Resource Definition
 
@@ -143,7 +149,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 ## Install object
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| install | object | `{"authentication":{"enabled":true,"image":{"name":"authentication"},"metrics":{"enabled":true}},"chat":{"enabled":true,"image":{"name":"chat"},"metrics":{"enabled":true}},"email":{"enabled":true,"image":{"name":"email"},"metrics":{"enabled":true}},"forms":{"enabled":true,"image":{"name":"forms"},"metrics":{"enabled":true}},"notification":{"enabled":true,"image":{"name":"push-notifications"},"metrics":{"enabled":true}},"sms":{"enabled":true,"image":{"name":"sms"},"metrics":{"enabled":true}},"storage":{"enabled":true,"image":{"name":"storage"},"metrics":{"enabled":true}}}` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router) |
+| install | object | See `values.yaml` | Choosing which microservices you want deployed (except for Admin-UI, Core, Database and Router). `install.embeddings` is disabled by default. |
 
 ## Module settings to apply to all services of the install object
 | Key | Type | Default | Description |

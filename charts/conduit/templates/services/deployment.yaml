@@ -1,6 +1,8 @@
 {{ $moduleSettings := index .Values "module-settings" }}
 {{- range $module, $spec := .Values.install -}}
 {{- $specService := $spec.service -}}
+{{- $specMetrics := $spec.metrics -}}
+{{- $specMetricsService := $spec.metrics.service -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: apps/v1
@@ -73,14 +75,15 @@ spec:
           securityContext:
             {{- toYaml $.Values.securityContext | nindent 12 }}
           resources:
-            {{- if $moduleSettings.resources }}
-              {{- toYaml $moduleSettings.resources | nindent 12 }}
-            {{- end }}
-            {{- if $spec.resources }}
-              {{- toYaml $spec.resources | nindent 12 }}
-            {{- end }}
+            {{- $moduleResources := default (dict) $moduleSettings.resources }}
+            {{- $specResources := default (dict) $spec.resources }}
+            {{- toYaml (mergeOverwrite (deepCopy $moduleResources) $specResources) | nindent 12 }}
           ports:
             - containerPort: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+            {{- if $specMetrics.enabled }}
+            - name: metrics
+              containerPort: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort }}
+            {{- end }}
           {{- $specReadiness := default (dict) $spec.readinessProbe }}
           {{- $moduleReadiness := default (dict) $moduleSettings.readinessProbe }}
           {{- $specLiveness := default (dict) $spec.livenessProbe }}
@@ -123,7 +126,11 @@ spec:
                   key: GRPC_KEY
             {{- end }}
             - name: GRPC_PORT
-              value: {{ coalesce $specService.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
+              value: {{ coalesce $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port | quote }}
+            {{- if $specMetrics.enabled }}
+            - name: METRICS_PORT
+              value: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort | quote }}
+            {{- end }}
             {{- if $moduleSettings.env }}
               {{- toYaml $moduleSettings.env | nindent 12 }}
             {{- end }}

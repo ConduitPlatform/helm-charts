@@ -47,11 +47,11 @@ spec:
     - protocol: TCP
       port: {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
       name: tcp
-      targetPort: {{ coalesce $specService.grpc_port $moduleSettings.containerPort $.Values.global.config.grpc_port }}
+      targetPort: {{ coalesce $specService.grpc_port $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}
 {{- if $spec.metrics.enabled }}
     - port: {{ default $moduleSettings.metrics.service.port $specMetricsService.port }}
       name: {{ default $moduleSettings.metrics.service.name $specMetricsService.name }}
-      targetPort: {{ $.Values.global.config.metrics_port }}
+      targetPort: {{ default $moduleSettings.metrics.service.targetPort $specMetricsService.targetPort }}
 {{- end }}
   type: ClusterIP
 {{- end }}
