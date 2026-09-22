@@ -428,6 +428,31 @@ core:
   # -- Configure for the container port
   containerPort: 5000
 
+  # -- Admin HTTP port (readiness/liveness HTTP probes)
+  adminHttpPort: 3030
+
+  # -- Readiness uses deep HTTP /ready on admin HTTP port
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 3030
+    timeoutSeconds: 3
+
+  # -- Liveness stays on gRPC health (shallow)
+  livenessProbe:
+    grpc:
+      port: 5000
+
+  # -- Startup probe gates slow module registration before liveness failures
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /ready
+      port: 3030
+    failureThreshold: 30
+    periodSeconds: 5
+    timeoutSeconds: 3
+
   # -- Init containers to add to the core pod
   initContainers: []
 

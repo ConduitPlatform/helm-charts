@@ -61,6 +61,11 @@ spec:
             {{- end }}
           securityContext:
             {{- toYaml $.Values.securityContext | nindent 12 }}
+          ports:
+            - name: grpc
+              containerPort: {{ default .Values.global.config.grpc_port .Values.core.containerPort }}
+            - name: admin-http
+              containerPort: {{ default 3030 .Values.core.adminHttpPort }}
           envFrom:
             - configMapRef:
                 name: conduit-cm
@@ -71,22 +76,37 @@ spec:
             {{- end }}
           {{- $readiness := default (dict) .Values.core.readinessProbe }}
           {{- $liveness := default (dict) .Values.core.livenessProbe }}
+          {{- $startup := default (dict) .Values.core.startupProbe }}
+          {{- $adminPort := default 3030 .Values.core.adminHttpPort }}
+          {{- $readyPath := dig "httpGet" "path" "/ready" $readiness }}
+          {{- $readyPort := dig "httpGet" "port" $adminPort $readiness }}
+          {{- $requiredModules := ternary "database,router" "database" .Values.router.enabled }}
           readinessProbe:
-            grpc:
-              port: {{ default .Values.global.config.grpc_port .Values.core.containerPort  }}
+            httpGet:
+              path: {{ $readyPath }}
+              port: {{ $readyPort }}
             initialDelaySeconds: {{ default $.Values.global.probes.readiness.initialDelaySeconds $readiness.initialDelaySeconds }}
             periodSeconds: {{ default $.Values.global.probes.readiness.periodSeconds $readiness.periodSeconds }}
-            timeoutSeconds: {{ default $.Values.global.probes.readiness.timeoutSeconds $readiness.timeoutSeconds }}
+            timeoutSeconds: {{ default 3 $readiness.timeoutSeconds }}
             successThreshold: {{ default $.Values.global.probes.readiness.successThreshold $readiness.successThreshold }}
             failureThreshold: {{ default $.Values.global.probes.readiness.failureThreshold $readiness.failureThreshold }}
           livenessProbe:
             grpc:
-              port: {{ default .Values.global.config.grpc_port .Values.core.containerPort }}
+              port: {{ dig "grpc" "port" .Values.global.config.grpc_port $liveness }}
             initialDelaySeconds: {{ default $.Values.global.probes.liveness.initialDelaySeconds $liveness.initialDelaySeconds }}
             periodSeconds: {{ default $.Values.global.probes.liveness.periodSeconds $liveness.periodSeconds }}
             timeoutSeconds: {{ default $.Values.global.probes.liveness.timeoutSeconds $liveness.timeoutSeconds }}
             successThreshold: {{ default $.Values.global.probes.liveness.successThreshold $liveness.successThreshold }}
             failureThreshold: {{ default $.Values.global.probes.liveness.failureThreshold $liveness.failureThreshold }}
+          {{- if $startup.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ dig "httpGet" "path" "/ready" $startup }}
+              port: {{ dig "httpGet" "port" $adminPort $startup }}
+            failureThreshold: {{ default 30 $startup.failureThreshold }}
+            periodSeconds: {{ default 5 $startup.periodSeconds }}
+            timeoutSeconds: {{ default 3 $startup.timeoutSeconds }}
+          {{- end }}
           env:
             - name: __DEFAULT_HOST_URL
               value: {{ template "conduit-helm.core.default_host" . }}
@@ -105,6 +125,8 @@ spec:
             {{- end }}
             - name: GRPC_PORT
               value: {{ default .Values.global.config.grpc_port .Values.core.containerPort | quote }}
+            - name: READY_REQUIRED_MODULES
+              value: {{ $requiredModules | quote }}
             {{- with .Values.core.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
