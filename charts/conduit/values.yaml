@@ -54,6 +54,12 @@ global:
   enableServiceMonitors: false
   # -- (Optional) list of image pull secrets for all pods
   imagePullSecrets: []
+  # -- Pod affinity for all Deployments unless a component override is set
+  affinity: {}
+  # -- Tolerations for all Deployments unless a component override is set
+  tolerations: []
+  # -- nodeSelector for all Deployments unless a component override is set
+  nodeSelector: {}
 
 # -- ServiceAccount configuration
 serviceAccount:
@@ -188,6 +194,13 @@ module-settings:
   # -- Annotations
   podAnnotations: {}
 
+  # -- Pod affinity for install.* modules (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations for install.* modules (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector for install.* modules (overrides global.nodeSelector when set)
+  nodeSelector: {}
+
   # -- Resource limits and requests
   resources:
     requests:
@@ -288,6 +301,13 @@ admin:
 
   # -- Annotations to be added to admin pods
   podAnnotations: {}
+
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
 
   image:
     # -- Image name
@@ -403,6 +423,13 @@ core:
 
   # -- Annotations to be added to core pods
   podAnnotations: {}
+
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
 
   image:
     # -- Image name
@@ -564,6 +591,13 @@ database:
   # -- Annotations to be added to database pods
   podAnnotations: {}
 
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
+
   image:
     # -- Image name
     name: database
@@ -677,6 +711,13 @@ router:
 
   # -- Annotations to be added to router pods
   podAnnotations: {}
+
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
 
   image:
     # -- Image name
@@ -842,6 +883,13 @@ redis:
   # -- Annotations to be added to redis pods
   podAnnotations: {}
 
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
+
   image:
     name: redis
     # -- Tag to use for the redis image
@@ -927,6 +975,13 @@ mongodb:
 
   # -- Annotations to be added to mongo pods
   podAnnotations: {}
+
+  # -- Pod affinity (overrides global.affinity when set)
+  affinity: {}
+  # -- Tolerations (overrides global.tolerations when set)
+  tolerations: []
+  # -- nodeSelector (overrides global.nodeSelector when set)
+  nodeSelector: {}
 
   image:
     name: mongo

@@ -287,3 +287,32 @@ Return the target Kubernetes version
 {{- define "conduit-helm.kubeVersion" -}}
   {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride }}
 {{- end -}}
+
+{{/*
+Render affinity, tolerations, and nodeSelector for a Deployment pod spec.
+Component values replace module-settings, which replace global, when set.
+Usage:
+  include "conduit-helm.podScheduling" (dict "root" . "component" .Values.core)
+  include "conduit-helm.podScheduling" (dict "root" $ "component" $spec "moduleSettings" $moduleSettings)
+*/}}
+{{- define "conduit-helm.podScheduling" -}}
+{{- $root := .root -}}
+{{- $component := default dict .component -}}
+{{- $moduleSettings := default dict .moduleSettings -}}
+{{- $global := default dict $root.Values.global -}}
+{{- $affinity := $component.affinity | default $moduleSettings.affinity | default $global.affinity -}}
+{{- $tolerations := $component.tolerations | default $moduleSettings.tolerations | default $global.tolerations -}}
+{{- $nodeSelector := $component.nodeSelector | default $moduleSettings.nodeSelector | default $global.nodeSelector -}}
+{{- if not (empty $affinity) }}
+affinity:
+  {{- toYaml $affinity | nindent 2 }}
+{{- end }}
+{{- if not (empty $tolerations) }}
+tolerations:
+  {{- toYaml $tolerations | nindent 2 }}
+{{- end }}
+{{- if not (empty $nodeSelector) }}
+nodeSelector:
+  {{- toYaml $nodeSelector | nindent 2 }}
+{{- end }}
+{{- end -}}

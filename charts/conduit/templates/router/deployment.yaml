@@ -115,4 +115,5 @@ spec:
         {{- with .Values.router.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- include "conduit-helm.podScheduling" (dict "root" . "component" .Values.router) | nindent 6 }}
 {{- end }}
