@@ -60,4 +60,5 @@ spec:
         {{- with .Values.mongodb.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- include "conduit-helm.podScheduling" (dict "root" . "component" .Values.mongodb) | nindent 6 }}
 {{- end }}

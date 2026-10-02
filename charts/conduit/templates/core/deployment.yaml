@@ -119,3 +119,4 @@ spec:
         {{- with .Values.core.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- include "conduit-helm.podScheduling" (dict "root" . "component" .Values.core) | nindent 6 }}

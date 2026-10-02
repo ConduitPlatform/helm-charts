@@ -103,6 +103,33 @@ Requires `global.secret.grpc_enable=true` (`GRPC_KEY`). The chart rejects `insta
 
 Deploy the workload with module-config workers still disabled, then enable workers after the pod is running. `install.embeddings.enabled: false` removes the Deployment/Service; vector fields, indexes, embedding configs, and Redis queue state are retained.
 
+## Pod scheduling
+
+Every Conduit Deployment (`admin`, `core`, `database`, `mongodb`, `redis`, `router`, and `install.*` modules) honors `affinity`, `tolerations`, and `nodeSelector`.
+
+Set them under `global` to apply to all Deployments. A non-empty value on `admin`, `core`, `database`, `router`, `redis`, `mongodb`, `module-settings`, or `install.<module>` replaces the global value for that workload. `install.<module>` replaces `module-settings` when both are set.
+
+Defaults are empty so existing installs are unchanged. Chart defaults do not pin architecture. To prefer ARM64 nodes (not require them):
+
+```yaml
+global:
+  tolerations:
+    - key: arch
+      operator: Equal
+      value: arm64
+      effect: NoSchedule
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - arm64
+```
+
 ## Custom Resource Definition
 
 By default this chart will install the Custom Resource Definition for Prometheus Service Monitors, located in crds/crd-servicemonitor.yaml.
@@ -136,15 +163,18 @@ Due to the use of the lookup function the random secret values will not be re-ge
 ## Global section
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| global.affinity | object | `{}` | Pod affinity for all Deployments unless a component override is set |
 | global.config.conduit_url | string | `""` | Override for "conduit-helm.conduit.url" |
 | global.config.grpc_port | int | `5000` | GRPC port |
 | global.config.metrics_port | int | `9100` | Metrics port, used for Prometheus |
 | global.image.imagePullPolicy | string | `"Always"` | If defined, a imagePullPolicy applied to all Conduit deployments |
 | global.image.repository | string | `"conduitplatform"` | Global repository option |
 | global.image.tag | string | `"latest"` | Overrides the global Conduit image tag whose default is the chart appVersion |
+| global.nodeSelector | object | `{}` | nodeSelector for all Deployments unless a component override is set |
 | global.secret.GRPC_KEY | string | `nil` | Optional GRPC Key override. Must be given in b64 format. |
 | global.secret.MASTER_KEY | string | `nil` | Master Secret override. Must be given in b64 format. |
 | global.secret.grpc_enable | bool | `true` | Optional GRPC Key option |
+| global.tolerations | list | `[]` | Tolerations for all Deployments unless a component override is set |
 
 ## Install object
 | Key | Type | Default | Description |
@@ -155,6 +185,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | module-settings | object | | Default module settings for the microservices (except Admin-UI, Core, Database, Router) |
+| module-settings.affinity | object | `{}` | Pod affinity for install.* modules (overrides global.affinity when set) |
 | module-settings.annotations | list | `[]` | Extra annotations |
 | module-settings.containerPort | int | `5000` | Configure for the container port |
 | module-settings.env | list | `[]` | Extra environment variables |
@@ -174,6 +205,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | module-settings.metrics.serviceMonitor.scheme | string | `""` | Prometheus ServiceMonitor scheme |
 | module-settings.metrics.serviceMonitor.selector | object | `{}` | Prometheus ServiceMonitor selector |
 | module-settings.metrics.serviceMonitor.tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig |
+| module-settings.nodeSelector | object | `{}` | nodeSelector for install.* modules (overrides global.nodeSelector when set) |
 | module-settings.podAnnotations | object | `{}` | Annotations |
 | module-settings.podLabels | object | `{}` | Labels |
 | module-settings.replicas | int | `1` | Number of pods to run |
@@ -182,12 +214,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | module-settings.service.annotations | object | `{}` | Service annotations |
 | module-settings.service.labels | object | `{}` | Service labels |
 | module-settings.service.tcp_port | int | `5000` | Service tcp port |
+| module-settings.tolerations | list | `[]` | Tolerations for install.* modules (overrides global.tolerations when set) |
 | module-settings.volumeMounts | list | `[]` | Additional volumeMounts |
 | module-settings.volumes | list | `[]` | Additional volumes |
 
 ## Admin UI
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| admin.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | admin.annotations | list | `[]` | Extra annotations |
 | admin.enabled | bool | `true` | Optional module. |
 | admin.env | list | `[]` | Extra environment variables to pass to the Admin Panel |
@@ -206,6 +240,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | admin.ingress.tls | list | `[]` | Ingress TLS configuration |
 | admin.initContainers | list | `[]` | Init containers to add to the admin pod |
 | admin.name | string | `"admin"` | Admin Panel name |
+| admin.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | admin.podAnnotations | object | `{}` | Annotations to be added to admin pods |
 | admin.podLabels | object | `{}` | Labels to be added to admin pods |
 | admin.replicas | int | `1` | Number of Admin Panel pods to run |
@@ -216,12 +251,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | admin.service.loadBalancerIP | string | `""` | LoadBalancer will get created with the IP specified in this field |
 | admin.service.nodePort | int | `31867` | Admin service http port for NodePort service type (only if `admin.service.type` is set to "NodePort") |
 | admin.service.type | string | `"ClusterIP"` | Admin service type |
+| admin.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | admin.volumeMounts | list | `[]` | Additional volumeMounts to the Admin main container |
 | admin.volumes | list | `[]` | Additional volumes to the Admin pod |
 
 ## Core
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| core.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | core.annotations | list | `[]` | Extra annotations |
 | core.containerPort | int | `5000` | Configure for the container port |
 | core.env | list | `[]` | Extra environment variables to pass to the core |
@@ -253,6 +290,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | core.metrics.serviceMonitor.selector | object | `{}` | Prometheus ServiceMonitor selector |
 | core.metrics.serviceMonitor.tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig |
 | core.name | string | `"core"` | Core name |
+| core.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | core.podAnnotations | object | `{}` | Annotations to be added to core pods |
 | core.podLabels | object | `{}` | Labels to be added to core pods |
 | core.replicas | int | `1` | Number of Core pods to run |
@@ -265,12 +303,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | core.service.socket_port | int | `3001` | Core service socket port |
 | core.service.tcp_port | int | `80` | Core service tcp port |
 | core.service.type | string | `"ClusterIP"` | Core service type |
+| core.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | core.volumeMounts | list | `[]` | Additional volumeMounts to the core main container |
 | core.volumes | list | `[]` | Additional volumes to the core pod |
 
 ## Database
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| database.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | database.annotations | list | `[]` | Extra annotations |
 | database.containerPort | int | `5000` | Configure for the container port |
 | database.env | list | `[]` | Extra environment variables to pass to the database |
@@ -295,6 +335,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | database.metrics.serviceMonitor.selector | object | `{}` | Prometheus ServiceMonitor selector |
 | database.metrics.serviceMonitor.tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig |
 | database.name | string | `"database-provider"` | Database name |
+| database.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | database.podAnnotations | object | `{}` | Annotations to be added to database pods |
 | database.podLabels | object | `{}` | Labels to be added to database pods |
 | database.replicas | int | `1` | Number of Database pods to run |
@@ -302,12 +343,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | database.service.annotations | object | `{}` | Database service annotations |
 | database.service.labels | object | `{}` | Database service labels |
 | database.service.tcp_port | int | `5000` | Database service tcp port |
+| database.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | database.volumeMounts | list | `[]` | Additional volumeMounts to the database main container |
 | database.volumes | list | `[]` | Additional volumes to the database pod |
 
 ## Router
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| router.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | router.annotations | list | `[]` | Extra annotations |
 | router.containerPort | int | `5000` | Configure for the container port |
 | router.enabled | bool | `true` | Optional module. |
@@ -340,6 +383,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | router.metrics.serviceMonitor.selector | object | `{}` | Prometheus ServiceMonitor selector |
 | router.metrics.serviceMonitor.tlsConfig | object | `{}` | Prometheus ServiceMonitor tlsConfig |
 | router.name | string | `"router"` | Router name |
+| router.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | router.podAnnotations | object | `{}` | Annotations to be added to router pods |
 | router.podLabels | object | `{}` | Labels to be added to router pods |
 | router.replicas | int | `1` | Number of Router pods to run |
@@ -352,12 +396,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | router.service.socket_port | int | `3001` | Router service socket port |
 | router.service.tcp_port | int | `80` | Router service tcp port |
 | router.service.type | string | `"ClusterIP"` | Router service type |
+| router.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | router.volumeMounts | list | `[]` | Additional volumeMounts to the router main container |
 | router.volumes | list | `[]` | Additional volumes to the router pod |
 
 ## Redis
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| redis.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | redis.annotations | list | `[]` | Extra annotations |
 | redis.enabled | bool | `true` | Optional module. If set to false, you may specify an external redis URL in the following section. |
 | redis.env | list | `[]` | Extra environment variables to pass to the redis |
@@ -368,12 +414,14 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | redis.image.tag | string | `"latest"` | Tag to use for the redis image |
 | redis.initContainers | list | `[]` | Init containers to add to the redis pod |
 | redis.name | string | `"redis"` | Redis name |
+| redis.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | redis.podAnnotations | object | `{}` | Annotations to be added to redis pods |
 | redis.podLabels | object | `{}` | Labels to be added to redis pods |
 | redis.replicas | int | `1` | Number of Redis pods to run |
 | redis.service | object | `{"annotations":{},"labels":{}}` | Storage service configuration |
 | redis.service.annotations | object | `{}` | Storage service annotations |
 | redis.service.labels | object | `{}` | Storage service labels |
+| redis.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | redis.volumeMounts | list | `[]` | Additional volumeMounts to the redis main container |
 | redis.volumes | list | `[]` | Additional volumes to the redis pod |
 
@@ -389,6 +437,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 ## MongoDB
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| mongodb.affinity | object | `{}` | Pod affinity (overrides global.affinity when set) |
 | mongodb.annotations | list | `[]` | Extra annotations |
 | mongodb.enabled | bool | `true` | Optional module. If set to false, specify an external MongoDB or Postgres URL in the following section. |
 | mongodb.env | list | `[]` | Extra environment variables to pass to the mongodb |
@@ -399,6 +448,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | mongodb.image.tag | string | `"latest"` | Tag to use for the mongo image |
 | mongodb.initContainers | list | `[]` | Init containers to add to the mongo pod |
 | mongodb.name | string | `"mongodb"` | MongoDB name |
+| mongodb.nodeSelector | object | `{}` | nodeSelector (overrides global.nodeSelector when set) |
 | mongodb.podAnnotations | object | `{}` | Annotations to be added to mongo pods |
 | mongodb.podLabels | object | `{}` | Labels to be added to mongo pods |
 | mongodb.port | int | `27017` | Configure for the container port |
@@ -406,6 +456,7 @@ Due to the use of the lookup function the random secret values will not be re-ge
 | mongodb.service | object | `{"annotations":{},"labels":{}}` | Mongo service configuration |
 | mongodb.service.annotations | object | `{}` | Mongo service annotations |
 | mongodb.service.labels | object | `{}` | Mongo service labels |
+| mongodb.tolerations | list | `[]` | Tolerations (overrides global.tolerations when set) |
 | mongodb.volumeMounts | list | `[]` | Additional volumeMounts to the mongodb main container |
 | mongodb.volumes | list | `[]` | Additional volumes to the mongodb pod |
 

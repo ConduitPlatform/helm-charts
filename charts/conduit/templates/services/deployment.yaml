@@ -157,5 +157,6 @@ spec:
         {{- if $spec.volumes }}
           {{- toYaml $spec.volumes | nindent 8 }}
         {{- end }}
+      {{- include "conduit-helm.podScheduling" (dict "root" $ "component" $spec "moduleSettings" $moduleSettings) | nindent 6 }}
 {{- end }}
 {{- end }}
