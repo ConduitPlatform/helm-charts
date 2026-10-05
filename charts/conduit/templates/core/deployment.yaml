@@ -40,9 +40,9 @@ spec:
       {{- if (not .Values.externalRedis.host ) }}
       initContainers:
         - name: wait-for-redis
-          image: goodsmileduck/redis-cli
-          imagePullPolicy: IfNotPresent
-          args: [ 'sh', '-c', 'until redis-cli  -h {{ template "conduit-helm.redis.fullname" . }} -p {{ .Values.redis.port }}  get hello; do echo "Sleeping a bit"; sleep 1; done; echo "ready!"; ' ]
+          image: {{ .Values.core.waitForRedis.image.repository }}:{{ .Values.core.waitForRedis.image.tag }}
+          imagePullPolicy: {{ .Values.core.waitForRedis.image.pullPolicy }}
+          args: [ 'sh', '-c', 'until nc -z {{ template "conduit-helm.redis.fullname" . }} {{ .Values.redis.port }}; do echo "waiting for redis"; sleep 2; done; echo "ready!"' ]
       {{- end }}
       {{- with .Values.core.initContainers }}
         {{- toYaml . | nindent 6 }}
