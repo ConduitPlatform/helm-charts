@@ -3,6 +3,37 @@ entries:
   conduit:
   - apiVersion: v2
     appVersion: v0.16.17
+    created: "2026-10-05T19:02:58.123856504Z"
+    dependencies:
+    - condition: loki.setup
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 3.2.0
+    - condition: prometheus.setup
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 27.6.0
+    description: Conduit backend platform – full stack micro-services Helm chart.
+    digest: 5b092df2797d190d91e5a85c93c86409252cd17bfceca24ef530784e08d35358
+    home: https://getconduit.dev
+    icon: https://raw.githubusercontent.com/ConduitPlatform/conduit/main/docs/logo.png
+    keywords:
+    - conduit
+    - backend
+    - microservices
+    maintainers:
+    - email: hello@getconduit.dev
+      name: Conduit Platform
+      url: https://github.com/ConduitPlatform
+    name: conduit
+    sources:
+    - https://github.com/ConduitPlatform/conduit
+    type: application
+    urls:
+    - https://github.com/ConduitPlatform/helm-charts/releases/download/conduit-0.2.12/conduit-0.2.12.tgz
+    version: 0.2.12
+  - apiVersion: v2
+    appVersion: v0.16.17
     created: "2026-10-02T15:45:06.44193184Z"
     dependencies:
     - condition: loki.setup
@@ -672,4 +703,4 @@ entries:
     urls:
     - https://github.com/ConduitPlatform/helm-charts/releases/download/conduit-0.1.0/conduit-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-02T15:45:06.442103477Z"
+generated: "2026-10-05T19:02:58.124045063Z"
