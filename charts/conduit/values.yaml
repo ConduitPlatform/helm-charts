@@ -455,6 +455,17 @@ core:
   # -- Configure for the container port
   containerPort: 5000
 
+  # -- Built-in wait-for-redis init container. Rendered only when externalRedis.host is empty.
+  # Uses multi-arch busybox (`nc -z`) so core can schedule on arm64 after affinity/tolerations.
+  waitForRedis:
+    image:
+      # -- Repository for the wait-for-redis init image (must include `nc`)
+      repository: busybox
+      # -- Tag for the wait-for-redis init image
+      tag: "1.36.1"
+      # -- Image pull policy for the wait-for-redis init image
+      pullPolicy: IfNotPresent
+
   # -- Init containers to add to the core pod
   initContainers: []
 
