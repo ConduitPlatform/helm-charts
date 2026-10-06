@@ -3,12 +3,15 @@
 {{- $specService := $spec.service -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
+{{- $appName := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $) "suffix" $module) -}}
+{{- $headlessName := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $) "suffix" (printf "%s-headless" $module)) -}}
+{{- $extraPodLabels := mergeOverwrite (deepCopy (default dict $moduleSettings.podLabels)) (default dict $spec.podLabels) -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+  name: {{ $appName }}
   namespace: {{ $.Release.Namespace }}
   annotations:
     {{- if $moduleSettings.annotations }}
@@ -19,24 +22,17 @@ metadata:
     {{- end }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+    app: {{ $appName }}
 spec:
   replicas: {{ default $moduleSettings.replicas $spec.replicas }}
   selector:
     matchLabels:
 {{ include "conduit-helm.selectorLabels" $ | indent 6 }}
-      app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+      app: {{ $appName }}
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" $ | indent 8 }}
-        app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
-      {{- if $moduleSettings.podLabels }}
-        {{- toYaml $moduleSettings.podLabels | nindent 8 }}
-      {{- end }}
-      {{- if $spec.podLabels }}
-        {{- toYaml $spec.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" $ "app" $appName "extra" $extraPodLabels) | indent 8 }}
       annotations:
       {{- if $moduleSettings.podAnnotations }}
         {{- toYaml $moduleSettings.podAnnotations | nindent 8 }}
@@ -50,10 +46,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with $.Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 6 }}
-      {{- end }}
+      {{- include "conduit-helm.podSecurityContext" (dict "root" $ "component" $spec) | nindent 6 }}
       initContainers:
       {{- if $moduleSettings.initContainers }}
         {{- toYaml $moduleSettings.initContainers | nindent 6 }}
@@ -63,7 +56,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ $module }}
-          image: {{ default $.Values.global.image.repository $spec.image.repository }}/{{ $spec.image.name }}:{{ default $.Values.global.image.tag $spec.image.tag }}
+          image: {{ include "conduit-helm.appImage" (dict "root" $ "component" $spec) }}
           imagePullPolicy: {{ default $.Values.global.image.imagePullPolicy $spec.image.imagePullPolicy }}
           command:
             {{- if $moduleSettings.extraArgs }}
@@ -72,8 +65,7 @@ spec:
             {{- if $spec.extraArgs }}
               {{- toYaml $spec.extraArgs | nindent 12 }}
             {{- end }}
-          securityContext:
-            {{- toYaml $.Values.securityContext | nindent 12 }}
+          {{- include "conduit-helm.containerSecurityContext" (dict "root" $ "component" $spec) | nindent 10 }}
           resources:
             {{- $moduleResources := default (dict) $moduleSettings.resources }}
             {{- $specResources := default (dict) $spec.resources }}
@@ -115,14 +107,14 @@ spec:
             {{- end }}
           env:
             - name: SERVICE_URL
-              value: {{ template "conduit-helm.fullname" $ }}-{{ $module }}-headless:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
+              value: {{ $headlessName }}:{{ default $moduleSettings.service.tcp_port $specService.tcp_port }}
             - name: CONDUIT_NAMESPACE
               value: {{ $.Release.Namespace }}
             {{- if $.Values.global.secret.grpc_enable }}
             - name: GRPC_KEY
               valueFrom:
                 secretKeyRef:
-                  name: conduit-secret
+                  name: {{ include "conduit-helm.secretName" $ }}
                   key: GRPC_KEY
             {{- end }}
             - name: GRPC_PORT

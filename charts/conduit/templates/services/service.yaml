@@ -4,15 +4,16 @@
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
 {{- $specServiceMonitor := (default (dict) $spec.metrics.serviceMonitor) -}}
+{{- $appName := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $) "suffix" $module) }}
 {{- if $spec.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+  name: {{ $appName }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+    app: {{ $appName }}
     {{- if $spec.metrics.enabled }}
     metrics.conduit.dev/enabled: "true"
     {{- end }}
@@ -42,7 +43,7 @@ metadata:
 spec:
   selector:
 {{ include "conduit-helm.selectorLabels" $ | indent 4 }}
-    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
+    app: {{ $appName }}
   ports:
     - protocol: TCP
       port: {{ default $moduleSettings.service.tcp_port $specService.tcp_port }}

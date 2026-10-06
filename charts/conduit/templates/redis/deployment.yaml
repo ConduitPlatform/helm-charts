@@ -8,29 +8,30 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}  
   labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.redis.fullname" . }}
 spec:
   replicas: {{ .Values.redis.replicas }}
+  strategy:
+    type: {{ .Values.redis.strategy.type }}
   selector:
     matchLabels:
       app: {{ template "conduit-helm.redis.fullname" . }}
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" . | indent 8 }}
-        app: {{ template "conduit-helm.redis.fullname" . }}
-      {{- if .Values.redis.podLabels }}
-        {{- toYaml .Values.redis.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.redis.fullname" .) "extra" .Values.redis.podLabels) | indent 8 }}
       {{- if .Values.redis.podAnnotations }}
       annotations:
         {{- toYaml .Values.redis.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "conduit-helm.podSecurityContext" (dict "root" . "component" .Values.redis) | nindent 6 }}
       containers:
         - name: {{ .Values.redis.name }}
-          image: {{ .Values.redis.image.name }}:{{ .Values.redis.image.tag }} 
+          image: {{ include "conduit-helm.image" (dict "repository" .Values.redis.image.name "tag" .Values.redis.image.tag "digest" .Values.redis.image.digest) }}
           imagePullPolicy: {{ .Values.redis.image.imagePullPolicy }}
+          {{- include "conduit-helm.containerSecurityContext" (dict "root" . "component" .Values.redis) | nindent 10 }}
           command:
             {{- if .Values.redis.extraArgs }}
               {{- toYaml .Values.redis.extraArgs | nindent 12 }}
@@ -66,7 +67,7 @@ spec:
         {{- if .Values.redis.persistence.enabled }}
         - name: redis-data
           persistentVolumeClaim:
-            claimName: {{ template "conduit-helm.redis.fullname" . }}-data
+            claimName: {{ include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.redis.fullname" .) "suffix" "data") }}
         {{- end }}
         {{- with .Values.redis.volumes }}
           {{- toYaml . | nindent 8 }}

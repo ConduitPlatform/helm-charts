@@ -1,20 +1,42 @@
-{{- if .Values.pdb.enabled }}
+{{- $root := . -}}
+{{- $workloads := list -}}
+{{- $workloads = append $workloads (dict "id" "core" "app" (include "conduit-helm.core.fullname" .) "component" .Values.core) -}}
+{{- if .Values.admin.enabled -}}
+{{- $workloads = append $workloads (dict "id" "admin" "app" (include "conduit-helm.admin.fullname" .) "component" .Values.admin) -}}
+{{- end -}}
+{{- if .Values.router.enabled -}}
+{{- $workloads = append $workloads (dict "id" "router" "app" (include "conduit-helm.router.fullname" .) "component" .Values.router) -}}
+{{- end -}}
+{{- $workloads = append $workloads (dict "id" "database" "app" (include "conduit-helm.database.fullname" .) "component" .Values.database) -}}
+{{- range $module, $spec := .Values.install -}}
+{{- if $spec.enabled -}}
+{{- $app := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $root) "suffix" $module) -}}
+{{- $workloads = append $workloads (dict "id" $module "app" $app "component" $spec) -}}
+{{- end -}}
+{{- end -}}
+{{- range $w := $workloads -}}
+{{- $pdb := default dict $w.component.pdb -}}
+{{- if eq (include "conduit-helm.boolOr" (dict "override" $pdb.enabled "fallback" $root.Values.pdb.enabled) | toString) "true" }}
+---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "conduit-helm.fullname" . }}-pdb
+  name: {{ include "conduit-helm.resourceName" (dict "prefix" $w.app "suffix" "pdb") }}
   labels:
-{{ include "conduit-helm.labels" . | indent 4 }}
-    app.kubernetes.io/component: core
+{{ include "conduit-helm.labels" $root | indent 4 }}
+    app.kubernetes.io/component: {{ $w.id }}
 spec:
-  {{- if .Values.pdb.minAvailable }}
-  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- $min := default $root.Values.pdb.minAvailable $pdb.minAvailable }}
+  {{- $max := default $root.Values.pdb.maxUnavailable $pdb.maxUnavailable }}
+  {{- if $min }}
+  minAvailable: {{ $min }}
   {{- end }}
-  {{- if .Values.pdb.maxUnavailable }}
-  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- if $max }}
+  maxUnavailable: {{ $max }}
   {{- end }}
   selector:
     matchLabels:
-{{ include "conduit-helm.selectorLabels" . | indent 6 }}
-      app: {{ include "conduit-helm.core.fullname" . }}
+{{ include "conduit-helm.selectorLabels" $root | indent 6 }}
+      app: {{ $w.app }}
+{{- end }}
 {{- end }}
