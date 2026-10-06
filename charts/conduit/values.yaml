@@ -317,10 +317,14 @@ admin:
   image:
     # -- Image name
     name: conduit-ui
+    # -- Intended images are from Dockerhub registry. Reminder: use tag latest for them.
     repository: ""
-    # -- UI tags do not track core; override when needed.
-    tag: v0.15.15
+    # -- Tag to use for the Admin Panel image
+    # @default -- `""` (defaults to global.image.tag)
+    tag: latest
     digest: ""
+    # -- Image pull policy for the Admin Panel image
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
 
   # -- Resource limits and requests for the Admin Panel

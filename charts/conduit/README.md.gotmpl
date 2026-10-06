@@ -230,8 +230,8 @@ Keys are created in `<fullname>-secret`. With the default `nameOverride: conduit
 | admin.extraContainers | list | `[]` | Additional containers to be added to the admin pod |
 | admin.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the Admin Panel image |
 | admin.image.name | string | `"conduit-ui"` | Image name |
-| admin.image.repository | string | `""` | Defaults to `global.image.repository` |
-| admin.image.tag | string | `"v0.15.15"` | UI tags do not track core; override when needed |
+| admin.image.repository | string | `""` | Intended images are from Dockerhub registry. Reminder: use tag latest for them. |
+| admin.image.tag | string | `"latest"` | Tag to use for the Admin Panel image |
 | admin.ingress | object | `{"annotations":null,"enabled":false,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Admin Panel |
 | admin.ingress.annotations | string | `nil` | Additional ingress annotations |
 | admin.ingress.extraPaths | list | `[]` | Additional ingress paths |
