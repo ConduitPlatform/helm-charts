@@ -3,17 +3,15 @@
 {{- $specService := $spec.service -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
-{{- $appName := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $) "suffix" $module) }}
-{{- $headlessName := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $) "suffix" (printf "%s-headless" $module)) }}
 {{- if $spec.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $headlessName }}
+  name: {{ template "conduit-helm.fullname" $ }}-{{ $module }}-headless
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
-    app: {{ $appName }}
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   {{- if $moduleSettings.service.labels }}
     {{- toYaml $moduleSettings.service.labels | nindent 4 }}
   {{- end }}
@@ -36,7 +34,7 @@ spec:
   publishNotReadyAddresses: true
   selector:
 {{ include "conduit-helm.selectorLabels" $ | indent 4 }}
-    app: {{ $appName }}
+    app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
   ports:
     - protocol: TCP
       port: {{ coalesce $specService.grpc_port $spec.containerPort $moduleSettings.containerPort $.Values.global.config.grpc_port }}

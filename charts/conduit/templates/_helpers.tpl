@@ -35,36 +35,46 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Join prefix-suffix and trunc to 63 chars.
-Usage: include "conduit-helm.resourceName" (dict "prefix" $prefix "suffix" $suffix)
+Create Admin-UI name and version as used by the chart label.
 */}}
-{{- define "conduit-helm.resourceName" -}}
-{{- printf "%s-%s" .prefix .suffix | trunc 63 | trimSuffix "-" -}}
-{{- end }}
-
 {{- define "conduit-helm.admin.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.admin.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.admin.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
+{{/*
+Create Core name and version as used by the chart label.
+*/}}
 {{- define "conduit-helm.core.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.core.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.core.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
+{{/*
+Create Database name and version as used by the chart label.
+*/}}
 {{- define "conduit-helm.database.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.database.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.database.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
+{{/*
+Create Router name and version as used by the chart label.
+*/}}
 {{- define "conduit-helm.router.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.router.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.router.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
+{{/*
+Create Redis name and version as used by the chart label.
+*/}}
 {{- define "conduit-helm.redis.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.redis.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.redis.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
+{{/*
+Create Mongo name and version as used by the chart label.
+*/}}
 {{- define "conduit-helm.mongodb.fullname" -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" .Values.mongodb.name) }}
-{{- end }}
+{{- printf "%s-%s" (include "conduit-helm.fullname" .) .Values.mongodb.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
 {{/*
 -------------------- Configs --------------------
@@ -123,7 +133,7 @@ Create connection URI for database.
 */}}
 {{- define "conduit-helm.db.uri" -}}
 {{- if .Values.mongodb.enabled -}}
-{{- printf "mongodb://%s.%s.svc.cluster.local:%d" (include "conduit-helm.mongodb.fullname" .) .Release.Namespace (int .Values.mongodb.port) | b64enc -}}
+{{- printf "mongodb://%s-mongodb.%s.svc.cluster.local:%d" (include "conduit-helm.fullname" .) .Release.Namespace (int .Values.mongodb.port) | b64enc -}}
 {{- else -}}
 {{- printf "%s" .Values.externalDatabase.url -}}
 {{- end -}}
@@ -140,135 +150,63 @@ Create database type variable.
 {{- end -}}
 {{- end -}}
 
-{{- define "conduit-helm.redis.passwordSecretName" -}}
-{{- if .Values.externalRedis.existingSecret -}}
-{{- .Values.externalRedis.existingSecret -}}
-{{- else -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" "redis") }}
-{{- end -}}
-{{- end }}
-
-{{- define "conduit-helm.secretName" -}}
-{{- if .Values.global.secret.existingSecret -}}
-{{- .Values.global.secret.existingSecret -}}
-{{- else -}}
-{{- include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" .) "suffix" "secret") }}
-{{- end -}}
-{{- end }}
-
-{{- define "conduit-helm.lookupSecretKey" -}}
-{{- $name := include "conduit-helm.secretName" .root -}}
-{{- $found := lookup "v1" "Secret" .root.Release.Namespace $name | default dict -}}
-{{- $data := $found.data | default dict -}}
-{{- if not (hasKey $data .key) -}}
-{{- $found = lookup "v1" "Secret" .root.Release.Namespace "conduit-secret" | default dict -}}
-{{- $data = $found.data | default dict -}}
-{{- end -}}
-{{- if hasKey $data .key -}}
-{{- index $data .key -}}
-{{- end -}}
-{{- end }}
-
+{{/*
+Create Master Key secret, by either auto-generating one or using one from Values.
+*/}}
 {{- define "conduit-helm.master_key" -}}
 {{- if .Values.global.secret.MASTER_KEY -}}
-{{- .Values.global.secret.MASTER_KEY -}}
+{{- printf "%s" .Values.global.secret.MASTER_KEY -}}
 {{- else -}}
-{{- $existing := include "conduit-helm.lookupSecretKey" (dict "root" . "key" "MASTER_KEY") -}}
-{{- if $existing -}}
-{{- $existing -}}
+{{- $existingSecret := lookup "v1" "Secret" .Release.Namespace "conduit-secret" }}
+{{- if $existingSecret -}}
+{{- $master_key := $existingSecret.data.MASTER_KEY }}
+{{- printf "%s" $master_key -}}
 {{- else -}}
-{{- randAlphaNum 32 | b64enc -}}
+{{- $master_key := randAlphaNum 32 | b64enc }}
+{{- printf "%s" $master_key -}}
 {{- end -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
 
+{{/*
+Create GRPC Key secret, by either auto-generating one or using one from Values.
+*/}}
 {{- define "conduit-helm.grpc_key" -}}
 {{- if and .Values.global.secret.grpc_enable .Values.global.secret.GRPC_KEY -}}
-{{- .Values.global.secret.GRPC_KEY -}}
-{{- else if .Values.global.secret.grpc_enable -}}
-{{- $existing := include "conduit-helm.lookupSecretKey" (dict "root" . "key" "GRPC_KEY") -}}
-{{- if $existing -}}
-{{- $existing -}}
+{{- printf "%s" .Values.global.secret.GRPC_KEY -}}
+{{- else if and .Values.global.secret.grpc_enable (not .Values.global.secret.GRPC_KEY) -}}
+{{- $existingSecret := lookup "v1" "Secret" .Release.Namespace "conduit-secret" }}
+{{- if $existingSecret -}}
+{{- $grpc_key := $existingSecret.data.GRPC_KEY }}
+{{- printf "%s" $grpc_key -}}
 {{- else -}}
-{{- randAlphaNum 32 | b64enc -}}
+{{- $grpc_key := randAlphaNum 32 | b64enc }}
+{{- printf "%s" $grpc_key -}}
 {{- end -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
 
-{{- define "conduit-helm.loki.serviceName" -}}
-{{- if contains "loki" .Release.Name -}}
-{{- .Release.Name -}}
-{{- else -}}
-{{- printf "%s-loki" .Release.Name -}}
-{{- end -}}
-{{- end }}
-
-{{- define "conduit-helm.prometheus.serviceName" -}}
-{{- if contains "prometheus" .Release.Name -}}
-{{- printf "%s-server" .Release.Name -}}
-{{- else -}}
-{{- printf "%s-prometheus-server" .Release.Name -}}
-{{- end -}}
-{{- end }}
-
+{{/*
+Create connection string for loki.
+*/}}
 {{- define "conduit-helm.loki.url" -}}
 {{- if .Values.loki.setup -}}
-{{- $port := 3100 -}}
-{{- if and .Values.loki.loki .Values.loki.loki.server .Values.loki.loki.server.http_listen_port -}}
-{{- $port = .Values.loki.loki.server.http_listen_port -}}
-{{- end -}}
-{{- printf "http://%s.%s.svc.cluster.local:%d" (include "conduit-helm.loki.serviceName" .) .Release.Namespace (int $port) -}}
+{{- printf "http://loki.%s.svc.cluster.local:%d" .Release.Namespace (int .Values.loki.loki.server.http_listen_port) -}}
 {{- else -}}
-{{- .Values.externalLoki.url -}}
+{{- printf "%s" .Values.externalLoki.url -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
 
+{{/*
+Create connection string for Prometheus.
+*/}}
 {{- define "conduit-helm.prometheus.url" -}}
 {{- if .Values.prometheus.setup -}}
-{{- printf "http://%s.%s.svc.cluster.local:%d" (include "conduit-helm.prometheus.serviceName" .) .Release.Namespace (int .Values.prometheus.server.service.servicePort) -}}
+{{- printf "http://%s-prometheus-server.%s.svc.cluster.local:%d" (include "conduit-helm.fullname" .) .Release.Namespace (int .Values.prometheus.server.service.servicePort) -}}
 {{- else -}}
-{{- .Values.externalPrometheus.url -}}
+{{- printf "%s" .Values.externalPrometheus.url -}}
 {{- end -}}
-{{- end }}
-
-{{- define "conduit-helm.image" -}}
-{{- if .digest -}}
-{{- printf "%s@%s" .repository .digest -}}
-{{- else -}}
-{{- printf "%s:%s" .repository (default "latest" .tag) -}}
 {{- end -}}
-{{- end }}
-
-{{- define "conduit-helm.appImage" -}}
-{{- $repo := printf "%s/%s" (default .root.Values.global.image.repository .component.image.repository) .component.image.name -}}
-{{- $tag := default .root.Chart.AppVersion (default .root.Values.global.image.tag .component.image.tag) -}}
-{{- $digest := default .root.Values.global.image.digest .component.image.digest -}}
-{{- include "conduit-helm.image" (dict "repository" $repo "tag" $tag "digest" $digest) -}}
-{{- end }}
-
-{{- define "conduit-helm.containerSecurityContext" -}}
-{{- $ctx := .component.securityContext | default .root.Values.securityContext -}}
-{{- if not (empty $ctx) }}
-securityContext:
-  {{- toYaml $ctx | nindent 2 }}
-{{- end }}
-{{- end }}
-
-{{- define "conduit-helm.podSecurityContext" -}}
-{{- $ctx := .component.podSecurityContext | default .root.Values.podSecurityContext -}}
-{{- if not (empty $ctx) }}
-securityContext:
-  {{- toYaml $ctx | nindent 2 }}
-{{- end }}
-{{- end }}
-
-{{- define "conduit-helm.boolOr" -}}
-{{- if kindIs "bool" .override -}}
-{{- .override -}}
-{{- else -}}
-{{- .fallback -}}
-{{- end -}}
-{{- end }}
 
 {{/*
 -------------------- Labels --------------------
@@ -292,22 +230,6 @@ Selector labels
 {{- define "conduit-helm.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "conduit-helm.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Pod template labels. Omits helm.sh/chart and app.kubernetes.io/version.
-*/}}
-{{- define "conduit-helm.podLabels" -}}
-{{- $root := .root -}}
-{{- $app := .app -}}
-{{- $extra := default dict .extra -}}
-{{ include "conduit-helm.selectorLabels" $root }}
-{{- if $app }}
-app: {{ $app }}
-{{- end }}
-{{- if not (empty $extra) }}
-{{ toYaml $extra }}
-{{- end }}
 {{- end }}
 
 {{/*
@@ -367,7 +289,11 @@ Return the target Kubernetes version
 {{- end -}}
 
 {{/*
-affinity / tolerations / nodeSelector: component > module-settings > global
+Render affinity, tolerations, and nodeSelector for a Deployment pod spec.
+Component values replace module-settings, which replace global, when set.
+Usage:
+  include "conduit-helm.podScheduling" (dict "root" . "component" .Values.core)
+  include "conduit-helm.podScheduling" (dict "root" $ "component" $spec "moduleSettings" $moduleSettings)
 */}}
 {{- define "conduit-helm.podScheduling" -}}
 {{- $root := .root -}}

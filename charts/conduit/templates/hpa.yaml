@@ -1,49 +1,29 @@
-{{- $root := . -}}
-{{- $workloads := list -}}
-{{- $workloads = append $workloads (dict "id" "core" "app" (include "conduit-helm.core.fullname" .) "component" .Values.core) -}}
-{{- if .Values.admin.enabled -}}
-{{- $workloads = append $workloads (dict "id" "admin" "app" (include "conduit-helm.admin.fullname" .) "component" .Values.admin) -}}
-{{- end -}}
-{{- if .Values.router.enabled -}}
-{{- $workloads = append $workloads (dict "id" "router" "app" (include "conduit-helm.router.fullname" .) "component" .Values.router) -}}
-{{- end -}}
-{{- $workloads = append $workloads (dict "id" "database" "app" (include "conduit-helm.database.fullname" .) "component" .Values.database) -}}
-{{- range $module, $spec := .Values.install -}}
-{{- if $spec.enabled -}}
-{{- $app := include "conduit-helm.resourceName" (dict "prefix" (include "conduit-helm.fullname" $root) "suffix" $module) -}}
-{{- $workloads = append $workloads (dict "id" $module "app" $app "component" $spec) -}}
-{{- end -}}
-{{- end -}}
-{{- range $w := $workloads -}}
-{{- $hpa := default dict $w.component.hpa -}}
-{{- if eq (include "conduit-helm.boolOr" (dict "override" $hpa.enabled "fallback" $root.Values.hpa.enabled) | toString) "true" }}
----
+{{- if .Values.hpa.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "conduit-helm.resourceName" (dict "prefix" $w.app "suffix" "hpa") }}
+  name: {{ include "conduit-helm.fullname" . }}-core
   labels:
-{{ include "conduit-helm.labels" $root | indent 4 }}
-    app.kubernetes.io/component: {{ $w.id }}
+{{ include "conduit-helm.labels" . | indent 4 }}
+    app.kubernetes.io/component: core
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ $w.app }}
-  minReplicas: {{ default $root.Values.hpa.minReplicas $hpa.minReplicas }}
-  maxReplicas: {{ default $root.Values.hpa.maxReplicas $hpa.maxReplicas }}
+    name: {{ include "conduit-helm.core.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ default $root.Values.hpa.targetCPUUtilizationPercentage $hpa.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ default $root.Values.hpa.targetMemoryUtilizationPercentage $hpa.targetMemoryUtilizationPercentage }}
-{{- end }}
+          averageUtilization: {{ .Values.hpa.targetMemoryUtilizationPercentage }}
 {{- end }}

@@ -21,8 +21,6 @@ global:
     tag: v0.16.17
     # -- If defined, a imagePullPolicy applied to all Conduit deployments
     imagePullPolicy: IfNotPresent
-    # -- Optional image digest; when set, takes precedence over tag
-    digest: ""
 
   # -- Configs
   config:
@@ -47,8 +45,6 @@ global:
       successThreshold: 1
       failureThreshold: 5
   secret:
-    # -- Use this Secret instead of creating one. Must contain MASTER_KEY and, if grpc_enable, GRPC_KEY.
-    existingSecret: ""
     # -- Master Secret override. Must be given in b64 format.
     MASTER_KEY:
     # -- Optional GRPC Key option
@@ -83,13 +79,12 @@ rbac:
 
 # -- Pod-level security context defaults
 podSecurityContext: {}
+# fsGroup: 2000
 
-# -- Container-level security context defaults. No runAsNonRoot here; Conduit images may run as root.
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
+# -- Container-level security context defaults
+securityContext: {}
+#  runAsUser: 1000
+#  runAsNonRoot: true
 # -- Microservice-specific values
 
 # -- Options for which services to install. You may override the default 'module-settings' below. Image name is required, since every image name is unique.
@@ -322,7 +317,6 @@ admin:
     # -- Tag to use for the Admin Panel image
     # @default -- `""` (defaults to global.image.tag)
     tag: latest
-    digest: ""
     # -- Image pull policy for the Admin Panel image
     # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
@@ -445,7 +439,8 @@ core:
     # -- Tag to use for the Core image
     # @default -- `""` (defaults to global.image.tag)
     tag: ""
-    digest: ""
+    # -- Image pull policy for the Core image
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
 
   # -- Resource limits and requests for Core
@@ -466,8 +461,9 @@ core:
     image:
       # -- Repository for the wait-for-redis init image (must include `nc`)
       repository: busybox
+      # -- Tag for the wait-for-redis init image
       tag: "1.36.1"
-      digest: ""
+      # -- Image pull policy for the wait-for-redis init image
       pullPolicy: IfNotPresent
 
   # -- Init containers to add to the core pod
@@ -621,7 +617,8 @@ database:
     # -- Tag to use for the Database image
     # @default -- `""` (defaults to global.image.tag)
     tag: ""
-    digest: ""
+    # -- Image pull policy for the Database image
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
 
   # -- Resource limits and requests for Database
@@ -741,7 +738,8 @@ router:
     # -- Tag to use for the Router image
     # @default -- `""` (defaults to global.image.tag)
     tag: ""
-    digest: ""
+    # -- Image pull policy for the Router image
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
     imagePullPolicy: ""
 
   # -- Resource limits and requests for Router
@@ -905,23 +903,11 @@ redis:
 
   image:
     name: redis
-    tag: "8.10.2"
-    digest: ""
+    # -- Tag to use for the redis image
+    tag: latest
+    # -- Image pull policy for the redis image.
+    # @default -- IfNotPresent
     imagePullPolicy: IfNotPresent
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    runAsNonRoot: true
-    runAsUser: 999
-  podSecurityContext:
-    fsGroup: 999
-    fsGroupChangePolicy: OnRootMismatch
-
-  strategy:
-    type: Recreate
 
   port: 6379
 
@@ -1010,31 +996,21 @@ mongodb:
 
   image:
     name: mongo
-    tag: "8.3.8"
-    digest: ""
+    # -- Tag to use for the mongo image
+    tag: latest
+    # -- Image pull policy for the mongo image.
+    # @default -- IfNotPresent
     imagePullPolicy: IfNotPresent
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    runAsNonRoot: true
-    runAsUser: 999
-  podSecurityContext:
-    fsGroup: 999
-    fsGroupChangePolicy: OnRootMismatch
 
   # -- Configure for the container port
   port: 27017
 
-  # -- Persistence configuration. claimName and size defaults match the previously hardcoded PVC.
+  # -- Persistence configuration
   persistence:
     enabled: true
-    claimName: mongo-pv-claim
     accessModes:
       - ReadWriteOnce
-    size: 5Gi
+    size: 8Gi
     storageClass: ""
 
   # -- Init containers to add to the mongo pod
@@ -1089,41 +1065,37 @@ externalDatabase:
   #
   url: ""
 
-# -- Loki dependency (chart 6.55, SingleBinary + filesystem)
+# -- Loki dependency configuration
 loki:
   setup: true
-  deploymentMode: SingleBinary
+
   loki:
+    # -- Single tenant deployment needed for loki
     auth_enabled: false
+
+    # -- The following sections are needed to deploy loki with the bare minimum
+
     commonConfig:
       replication_factor: 1
-    useTestSchema: true
+
     storage:
-      type: filesystem
-      bucketNames:
-        chunks: chunks
-        ruler: ruler
-        admin: admin
+      type: "filesystem"
+    rulerConfig:
+      storage:
+        type: local
+
+    # -- Override for Loki service port
     server:
       http_listen_port: 3100
-  singleBinary:
-    replicas: 1
-  read:
-    replicas: 0
-  write:
-    replicas: 0
-  backend:
-    replicas: 0
-  gateway:
-    enabled: false
-  lokiCanary:
-    enabled: false
-  test:
-    enabled: false
-  chunksCache:
-    enabled: false
-  minio:
-    enabled: false
+
+  # -- Self Monitoring disabled by default. You may enable it for additional logs
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+      lokiCanary:
+        enabled: false
 
 # -- External Loki section
 externalLoki:
@@ -1168,3 +1140,5 @@ pdb:
 # -- NetworkPolicy global defaults
 networkPolicy:
   enabled: false
+  ingress: []
+  egress: []

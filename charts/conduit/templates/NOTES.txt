@@ -1,10 +1,38 @@
-Conduit is deployed.
+Conduit JS Helm chart has been deployed.
 
-Admin UI (default login admin / admin):
-  kubectl port-forward svc/{{ include "conduit-helm.admin.fullname" . }} 8000:{{ .Values.admin.service.http_port }}
+You may access Conduit through the Admin panel by setting .Values.admin.enabled to true. To expose the service you may use port forwarding:
+kubectl port-forward svc/conduit-admin 8000:80
 
-Redis: set redis.enabled or externalRedis.host (and password / existingSecret as needed).
-Database: set mongodb.enabled or externalDatabase.url + type.
-Loki: loki.setup or externalLoki.url. Prometheus: prometheus.setup or externalPrometheus.url.
+For more advanced options, there is also support for Ingress as well as NodePort and LoadBalancer configurations.
 
-install.embeddings.enabled deploys the embeddings workload only. Requires global.secret.grpc_enable.
+After reaching the UI the first time you can login with username: admin and password: admin. 
+
+Deployment options:
+
+1. Redis (required)
+
+a) Default Redis image. Set .Values.redis.enabled to true, for this option.
+b) External Redis. Set the .Values.externalRedis.host and the related values (port, password etc), for this option.
+
+2. Database (required)
+
+a) Default Mongo image. Set .Values.mongodb.enabled to true, for this option.
+b) External Database, Mongo or Postgres. Set the .Values.externalDatabase.url along with its type, for this option.
+
+3. Loki (optional)
+
+a) Loki chart dependency. Set .Values.loki.setup to true, for this option.
+b) External Loki. Set .Values.externalLoki.url to true, for this option.
+
+4. Prometheus Metrics (optional)
+
+a) Prometheus chart dependency. Set .Values.prometheus.setup to true, for this option.
+b) External Prometheus. Set .Values.externalPrometheus.url to true, for this option.
+
+5. Embeddings (optional, disabled by default)
+
+install.embeddings.enabled deploys the Kubernetes workload only; it is not the embeddings module-config enabled flag that starts generation/search workers.
+
+Set install.embeddings.enabled=true only after conduitplatform/embeddings exists at the chosen image tag (install.embeddings.image.tag, defaulting to global.image.tag). Chart appVersion does not mean that image exists.
+
+Requires global.secret.grpc_enable=true (GRPC_KEY). Roll out with module-config workers still disabled. Rollback with install.embeddings.enabled=false; vector fields, indexes, embedding configs, and Redis state are retained.
