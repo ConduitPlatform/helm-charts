@@ -19,11 +19,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" . | indent 8 }}
-        app: {{ template "conduit-helm.database.fullname" . }}
-      {{- if .Values.database.podLabels }}
-        {{- toYaml .Values.database.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.database.fullname" .) "extra" .Values.database.podLabels) | indent 8 }}
       {{- if .Values.database.podAnnotations }}
       annotations:
         {{- toYaml .Values.database.podAnnotations | nindent 8 }}

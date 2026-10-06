@@ -3,6 +3,8 @@
 {{- $specService := $spec.service -}}
 {{- $specMetrics := $spec.metrics -}}
 {{- $specMetricsService := $spec.metrics.service -}}
+{{- $appName := printf "%s-%s" (include "conduit-helm.fullname" $) $module -}}
+{{- $extraPodLabels := mergeOverwrite (deepCopy (default dict $moduleSettings.podLabels)) (default dict $spec.podLabels) -}}
 {{- if $spec.enabled }}
 ---
 apiVersion: apps/v1
@@ -29,14 +31,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" $ | indent 8 }}
-        app: {{ template "conduit-helm.fullname" $ }}-{{ $module }}
-      {{- if $moduleSettings.podLabels }}
-        {{- toYaml $moduleSettings.podLabels | nindent 8 }}
-      {{- end }}
-      {{- if $spec.podLabels }}
-        {{- toYaml $spec.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" $ "app" $appName "extra" $extraPodLabels) | indent 8 }}
       annotations:
       {{- if $moduleSettings.podAnnotations }}
         {{- toYaml $moduleSettings.podAnnotations | nindent 8 }}

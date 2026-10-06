@@ -8,6 +8,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}  
   labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.mongodb.fullname" . }}
 spec:
   replicas: {{ .Values.mongodb.replicas }}
@@ -17,11 +18,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" . | indent 8 }}
-        app: {{ template "conduit-helm.mongodb.fullname" . }}
-      {{- if .Values.mongodb.podLabels }}
-        {{- toYaml .Values.mongodb.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.mongodb.fullname" .) "extra" .Values.mongodb.podLabels) | indent 8 }}
       {{- if .Values.mongodb.podAnnotations }}
       annotations:
         {{- toYaml .Values.mongodb.podAnnotations | nindent 8 }}

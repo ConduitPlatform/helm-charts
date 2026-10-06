@@ -1,6 +1,6 @@
 # Conduit
 
-![Version: 0.2.12](https://img.shields.io/badge/Version-0.2.12-informational?style=flat-square)  ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)  ![AppVersion: v0.16.17](https://img.shields.io/badge/AppVersion-v0.16.17-informational?style=flat-square)
+![Version: 0.2.13](https://img.shields.io/badge/Version-0.2.13-informational?style=flat-square)  ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)  ![AppVersion: v0.16.17](https://img.shields.io/badge/AppVersion-v0.16.17-informational?style=flat-square)
 
 Conduit is a NodeJS-based Self-Hosted backend, that aims to cut down development times by providing ready-made modules that offer common functionality out of the box, and allowing maximum flexibility to add custom functionality.
 
@@ -57,10 +57,10 @@ helm show values [RELEASE_NAME]
 
 You may access Conduit through the Admin panel by setting .Values.admin.enabled to true.
 
-To expose the service you may use port forwarding:
+To expose the service you may use port forwarding (service name is `<release>-conduit-admin` unless `fullnameOverride` is set):
 
 ```console
-kubectl port-forward svc/conduit-admin 8000:80
+kubectl port-forward svc/<release>-conduit-admin 8000:80
 ```
 
 For more advanced options, there is also support for Ingress as well as NodePort and LoadBalancer configurations.
@@ -85,13 +85,13 @@ b) External Database, Mongo or Postgres. Set the `.Values.externalDatabase.url` 
 
 a) Loki chart dependency. Set `.Values.loki.setup` to `true`, for this option.
 
-b) External Loki. Set `.Values.externalLoki.url` to `true`, for this option.
+b) External Loki. Set `.Values.externalLoki.url` to the Loki HTTP URL, for this option.
 
 4. Prometheus Metrics (optional)
 
 a) Prometheus chart dependency. Set `.Values.prometheus.setup` to `true`, for this option.
 
-b) External Prometheus. Set `.Values.externalPrometheus.url` to `true`, for this option.
+b) External Prometheus. Set `.Values.externalPrometheus.url` to the Prometheus HTTP URL, for this option.
 
 ## Embeddings (disabled by default)
 
@@ -129,6 +129,12 @@ global:
                 values:
                   - arm64
 ```
+
+## Label stability
+
+`helm.sh/chart` and `app.kubernetes.io/version` are applied only on resource `metadata.labels` (via `conduit-helm.labels`). Pod templates use `conduit-helm.podLabels`: selector labels, the component `app` label, and `podLabels` from values. Chart version bumps therefore do not change pod templates or roll Deployments.
+
+Do not put `helm.sh/chart`, `app.kubernetes.io/version`, timestamps, or other volatile keys in `*.podLabels` or `*.podAnnotations`.
 
 ## Custom Resource Definition
 

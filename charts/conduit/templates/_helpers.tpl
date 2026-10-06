@@ -213,7 +213,9 @@ Create connection string for Prometheus.
 */}}
 
 {{/*
-Common labels
+Common labels for resource metadata (Deployments, Services, etc.).
+Includes helm.sh/chart and app.kubernetes.io/version, which change on chart bumps.
+Do not use these on pod templates — that rolls every workload on a version-only change.
 */}}
 {{- define "conduit-helm.labels" -}}
 helm.sh/chart: {{ include "conduit-helm.chart" . }}
@@ -230,6 +232,29 @@ Selector labels
 {{- define "conduit-helm.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "conduit-helm.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Stable labels for pod templates. Excludes helm.sh/chart, app.kubernetes.io/version,
+managed-by, timestamps, and other values that change when only Chart.Version moves.
+
+Usage:
+  include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.core.fullname" .) "extra" .Values.core.podLabels)
+
+Selector matchLabels must keep using selectorLabels + app independently; this helper
+only shapes template.metadata.labels so they stay a superset of the selector.
+*/}}
+{{- define "conduit-helm.podLabels" -}}
+{{- $root := .root -}}
+{{- $app := .app -}}
+{{- $extra := default dict .extra -}}
+{{ include "conduit-helm.selectorLabels" $root }}
+{{- if $app }}
+app: {{ $app }}
+{{- end }}
+{{- if not (empty $extra) }}
+{{ toYaml $extra }}
+{{- end }}
 {{- end }}
 
 {{/*

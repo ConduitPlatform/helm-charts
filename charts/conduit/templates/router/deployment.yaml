@@ -20,11 +20,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" . | indent 8 }}
-        app: {{ template "conduit-helm.router.fullname" . }}
-      {{- if .Values.router.podLabels }}
-        {{- toYaml .Values.router.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.router.fullname" .) "extra" .Values.router.podLabels) | indent 8 }}
       {{- if .Values.router.podAnnotations }}
       annotations:
         {{- toYaml .Values.router.podAnnotations | nindent 8 }}

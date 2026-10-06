@@ -8,6 +8,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}  
   labels:
+{{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.redis.fullname" . }}
 spec:
   replicas: {{ .Values.redis.replicas }}
@@ -17,11 +18,7 @@ spec:
   template:
     metadata:
       labels:
-{{ include "conduit-helm.labels" . | indent 8 }}
-        app: {{ template "conduit-helm.redis.fullname" . }}
-      {{- if .Values.redis.podLabels }}
-        {{- toYaml .Values.redis.podLabels | nindent 8 }}
-      {{- end }}
+{{ include "conduit-helm.podLabels" (dict "root" . "app" (include "conduit-helm.redis.fullname" .) "extra" .Values.redis.podLabels) | indent 8 }}
       {{- if .Values.redis.podAnnotations }}
       annotations:
         {{- toYaml .Values.redis.podAnnotations | nindent 8 }}

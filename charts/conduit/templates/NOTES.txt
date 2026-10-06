@@ -1,11 +1,11 @@
 Conduit JS Helm chart has been deployed.
 
 You may access Conduit through the Admin panel by setting .Values.admin.enabled to true. To expose the service you may use port forwarding:
-kubectl port-forward svc/conduit-admin 8000:80
+kubectl port-forward svc/{{ include "conduit-helm.admin.fullname" . }} 8000:{{ .Values.admin.service.http_port }}
 
 For more advanced options, there is also support for Ingress as well as NodePort and LoadBalancer configurations.
 
-After reaching the UI the first time you can login with username: admin and password: admin. 
+After reaching the UI the first time you can login with username: admin and password: admin.
 
 Deployment options:
 
@@ -22,12 +22,12 @@ b) External Database, Mongo or Postgres. Set the .Values.externalDatabase.url al
 3. Loki (optional)
 
 a) Loki chart dependency. Set .Values.loki.setup to true, for this option.
-b) External Loki. Set .Values.externalLoki.url to true, for this option.
+b) External Loki. Set .Values.externalLoki.url to the Loki HTTP URL, for this option.
 
 4. Prometheus Metrics (optional)
 
 a) Prometheus chart dependency. Set .Values.prometheus.setup to true, for this option.
-b) External Prometheus. Set .Values.externalPrometheus.url to true, for this option.
+b) External Prometheus. Set .Values.externalPrometheus.url to the Prometheus HTTP URL, for this option.
 
 5. Embeddings (optional, disabled by default)
 
