@@ -1,16 +1,17 @@
-{{- if .Values.mongodb.enabled  -}}
-{{- range $volume := .Values.mongodb.volumes -}}
+{{- if and .Values.mongodb.enabled .Values.mongodb.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $volume.persistentVolumeClaim.claimName }}
+  name: {{ .Values.mongodb.persistence.claimName }}
   labels:
-    app: {{ $volume.persistentVolumeClaim.claimName }}
+    app: {{ .Values.mongodb.persistence.claimName }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    {{- toYaml .Values.mongodb.persistence.accessModes | nindent 4 }}
   resources:
     requests:
-      storage: 5Gi
-{{- end }}     
+      storage: {{ .Values.mongodb.persistence.size }}
+  {{- if .Values.mongodb.persistence.storageClass }}
+  storageClassName: {{ .Values.mongodb.persistence.storageClass }}
+  {{- end }}
 {{- end }}

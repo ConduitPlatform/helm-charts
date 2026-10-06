@@ -39,7 +39,7 @@ maintainers:
 
 dependencies:
   - name: loki
-    version: 3.2.0
+    version: 6.55.0
     repository: https://grafana.github.io/helm-charts
     condition: loki.setup
   - name: prometheus

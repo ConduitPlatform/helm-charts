@@ -24,14 +24,16 @@ spec:
         {{- toYaml .Values.mongodb.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "conduit-helm.podSecurityContext" (dict "root" . "component" .Values.mongodb) | nindent 6 }}
       {{- with .Values.mongodb.initContainers }}
       initContainers:
         {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:
         - name: {{ .Values.mongodb.name }}
-          image: {{ .Values.mongodb.image.name }}:{{ .Values.mongodb.image.tag }} 
+          image: {{ include "conduit-helm.image" (dict "repository" .Values.mongodb.image.name "tag" .Values.mongodb.image.tag "digest" .Values.mongodb.image.digest) }}
           imagePullPolicy: {{ .Values.mongodb.image.imagePullPolicy }}
+          {{- include "conduit-helm.containerSecurityContext" (dict "root" . "component" .Values.mongodb) | nindent 10 }}
           command:
             {{- with .Values.mongodb.extraArgs }}
               {{- toYaml . | nindent 12 }}
