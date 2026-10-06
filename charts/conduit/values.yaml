@@ -318,7 +318,8 @@ admin:
     # -- Image name
     name: conduit-ui
     repository: ""
-    tag: v0.16.17
+    # -- UI tags do not track core; override when needed.
+    tag: v0.15.15
     digest: ""
     imagePullPolicy: ""
 
@@ -913,6 +914,7 @@ redis:
     runAsUser: 999
   podSecurityContext:
     fsGroup: 999
+    fsGroupChangePolicy: OnRootMismatch
 
   strategy:
     type: Recreate
@@ -1017,6 +1019,7 @@ mongodb:
     runAsUser: 999
   podSecurityContext:
     fsGroup: 999
+    fsGroupChangePolicy: OnRootMismatch
 
   # -- Configure for the container port
   port: 27017

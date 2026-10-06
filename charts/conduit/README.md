@@ -148,7 +148,7 @@ This CRD is also provided by default if you choose to deploy the Loki chart depe
 
 ## Secrets
 
-Keys are created in `<fullname>-secret` (`conduit-secret` for a typical `conduit` release). Set `global.secret.existingSecret` to use your own. On upgrade the chart looks up the scoped name, then the legacy `conduit-secret`, so existing keys are reused. The generated Secret has `helm.sh/resource-policy: keep`.
+Keys are created in `<fullname>-secret`. With the default `nameOverride: conduit` and a typical `helm install conduit`, that is still `conduit-secret`. On upgrade the chart looks up the scoped name, then legacy `conduit-secret`, so MASTER_KEY/GRPC_KEY are reused for any release name as long as `nameOverride` stays `conduit` (or `existingSecret` is set). Changing `nameOverride` or `fullnameOverride` changes the new Secret name — the one footgun; lookup still copies keys from `conduit-secret` if that Secret exists. `helm.sh/resource-policy: keep`.
 
 ## Values
 
@@ -230,8 +230,8 @@ Keys are created in `<fullname>-secret` (`conduit-secret` for a typical `conduit
 | admin.extraContainers | list | `[]` | Additional containers to be added to the admin pod |
 | admin.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the Admin Panel image |
 | admin.image.name | string | `"conduit-ui"` | Image name |
-| admin.image.repository | string | `""` | Intended images are from Dockerhub registry. Reminder: use tag latest for them. |
-| admin.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Admin Panel image |
+| admin.image.repository | string | `""` | Defaults to `global.image.repository` |
+| admin.image.tag | string | `"v0.15.15"` | UI tags do not track core; override when needed |
 | admin.ingress | object | `{"annotations":null,"enabled":false,"extraPaths":[],"hostName":"","tls":[]}` | Enable an ingress resource for the Admin Panel |
 | admin.ingress.annotations | string | `nil` | Additional ingress annotations |
 | admin.ingress.extraPaths | list | `[]` | Additional ingress paths |
