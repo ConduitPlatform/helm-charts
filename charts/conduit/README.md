@@ -473,10 +473,14 @@ Keys are created in `<fullname>-secret` (`conduit-secret` for a typical `conduit
 ## Loki
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| loki.loki.auth_enabled | bool | `false` | Single tenant deployment needed for loki |
-| loki.loki.commonConfig | object | `{"replication_factor":1}` | The following sections are needed to deploy loki with the bare minimum |
-| loki.loki.server | object | `{"http_listen_port":3100}` | Override for Loki service port |
-| loki.monitoring | object | `{"selfMonitoring":{"enabled":false,"grafanaAgent":{"installOperator":false},"lokiCanary":{"enabled":false}}}` | Self Monitoring disabled by default. You may enable it for additional logs |
+| loki.setup | bool | `true` | Install the Loki chart dependency (6.55 SingleBinary + filesystem) |
+| loki.deploymentMode | string | `"SingleBinary"` | Loki deployment mode |
+| loki.loki.auth_enabled | bool | `false` | Single tenant |
+| loki.loki.commonConfig | object | `{"replication_factor":1}` | Minimum Loki common config |
+| loki.loki.server | object | `{"http_listen_port":3100}` | Loki HTTP listen port |
+| loki.loki.useTestSchema | bool | `true` | Filesystem test schema for SingleBinary |
+| loki.lokiCanary.enabled | bool | `false` | Loki canary |
+| loki.test.enabled | bool | `false` | Loki helm tests (require canary if enabled) |
 
 ## External Loki
 | Key | Type | Default | Description |

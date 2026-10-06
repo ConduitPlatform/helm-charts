@@ -158,12 +158,14 @@ Create database type variable.
 
 {{- define "conduit-helm.lookupSecretKey" -}}
 {{- $name := include "conduit-helm.secretName" .root -}}
-{{- $found := lookup "v1" "Secret" .root.Release.Namespace $name -}}
-{{- if not (and $found $found.data (index $found.data .key)) -}}
-{{- $found = lookup "v1" "Secret" .root.Release.Namespace "conduit-secret" -}}
+{{- $found := lookup "v1" "Secret" .root.Release.Namespace $name | default dict -}}
+{{- $data := $found.data | default dict -}}
+{{- if not (hasKey $data .key) -}}
+{{- $found = lookup "v1" "Secret" .root.Release.Namespace "conduit-secret" | default dict -}}
+{{- $data = $found.data | default dict -}}
 {{- end -}}
-{{- if and $found $found.data (index $found.data .key) -}}
-{{- index $found.data .key -}}
+{{- if hasKey $data .key -}}
+{{- index $data .key -}}
 {{- end -}}
 {{- end }}
 

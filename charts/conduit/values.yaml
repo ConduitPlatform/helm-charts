@@ -1111,6 +1111,8 @@ loki:
     enabled: false
   lokiCanary:
     enabled: false
+  test:
+    enabled: false
   chunksCache:
     enabled: false
   minio:
@@ -1159,5 +1161,3 @@ pdb:
 # -- NetworkPolicy global defaults
 networkPolicy:
   enabled: false
-  ingress: []
-  egress: []
