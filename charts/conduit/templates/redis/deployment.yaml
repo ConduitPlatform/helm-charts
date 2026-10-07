@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   name: {{ template "conduit-helm.redis.fullname" . }} 
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.redis.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}  

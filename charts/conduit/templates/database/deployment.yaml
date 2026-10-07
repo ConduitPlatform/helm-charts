@@ -4,6 +4,7 @@ metadata:
   name: {{ template "conduit-helm.database.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.database.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}

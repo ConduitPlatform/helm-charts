@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   name: {{ template "conduit-helm.mongodb.fullname" . }} 
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.mongodb.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}  

@@ -9,10 +9,11 @@ metadata:
   {{- if .Values.core.service.labels }}
     {{- toYaml .Values.core.service.labels | nindent 4 }}
   {{- end }}
-  {{- if .Values.core.service.annotations }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
+    {{- if .Values.core.service.annotations }}
     {{- toYaml .Values.core.service.annotations | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   clusterIP: None
   publishNotReadyAddresses: true

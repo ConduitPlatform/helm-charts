@@ -23,6 +23,7 @@ metadata:
   {{- end }}
   {{- end }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" $ | indent 4 }}
   {{- if $moduleSettings.service.annotations }}
     {{- toYaml $moduleSettings.service.annotations | nindent 4 }}
   {{- end }}
