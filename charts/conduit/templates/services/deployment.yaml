@@ -14,6 +14,7 @@ metadata:
   name: {{ $appName }}
   namespace: {{ $.Release.Namespace }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" $ | indent 4 }}
     {{- if $moduleSettings.annotations }}
       {{- toYaml $moduleSettings.annotations | nindent 4 }}
     {{- end }}

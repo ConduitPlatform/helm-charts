@@ -17,6 +17,8 @@ metadata:
   {{- else if $moduleSettings.metrics.serviceMonitor.namespace }}
   namespace: {{ $moduleSettings.metrics.serviceMonitor.namespace}}
   {{- end }}
+  annotations:
+{{ include "conduit-helm.chartAnnotations" $ | indent 4 }}
   labels:
 {{ include "conduit-helm.labels" $ | indent 4 }}
     app: {{ $appName }}

@@ -8,6 +8,7 @@ metadata:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ template "conduit-helm.admin.fullname" . }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.admin.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}  

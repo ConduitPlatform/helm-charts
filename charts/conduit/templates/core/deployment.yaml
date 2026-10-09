@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "conduit-helm.core.fullname" . }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.core.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}

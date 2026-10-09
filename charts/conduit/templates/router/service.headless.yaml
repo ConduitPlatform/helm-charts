@@ -12,6 +12,7 @@ metadata:
     {{- toYaml .Values.router.service.labels | nindent 4 }}
   {{- end }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- if .Values.router.service.annotations }}
     {{- toYaml .Values.router.service.annotations | nindent 4 }}
     {{- end }}

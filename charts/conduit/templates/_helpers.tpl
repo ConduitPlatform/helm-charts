@@ -275,15 +275,23 @@ securityContext:
 */}}
 
 {{/*
-Common labels
+Common labels. Omits helm.sh/chart and app.kubernetes.io/version so chart
+bumps do not rewrite resource metadata labels.
 */}}
 {{- define "conduit-helm.labels" -}}
-helm.sh/chart: {{ include "conduit-helm.chart" . }}
 {{ include "conduit-helm.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Chart identity annotations for Deployment, Service, and ServiceMonitor
+object metadata (not pod templates).
+*/}}
+{{- define "conduit-helm.chartAnnotations" -}}
+helm.sh/chart: {{ include "conduit-helm.chart" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*

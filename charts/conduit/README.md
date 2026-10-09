@@ -1,6 +1,6 @@
 # Conduit
 
-![Version: 0.2.13](https://img.shields.io/badge/Version-0.2.13-informational?style=flat-square)  ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)  ![AppVersion: v0.16.17](https://img.shields.io/badge/AppVersion-v0.16.17-informational?style=flat-square)
+![Version: 0.2.14](https://img.shields.io/badge/Version-0.2.14-informational?style=flat-square)  ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)  ![AppVersion: v0.16.17](https://img.shields.io/badge/AppVersion-v0.16.17-informational?style=flat-square)
 
 Conduit is a NodeJS-based Self-Hosted backend, that aims to cut down development times by providing ready-made modules that offer common functionality out of the box, and allowing maximum flexibility to add custom functionality.
 
@@ -132,7 +132,7 @@ global:
 
 ## Label stability
 
-`helm.sh/chart` and `app.kubernetes.io/version` are set on resource metadata only. Pod templates use `conduit-helm.podLabels` (selector labels, component `app`, and values `podLabels`).
+`helm.sh/chart` and `app.kubernetes.io/version` are omitted from common resource labels so chart bumps do not rewrite `metadata.labels`. They are set as annotations on Deployment, Service, and ServiceMonitor object metadata. Pod templates use `conduit-helm.podLabels` (selector labels, component `app`, and values `podLabels`). Selectors are unchanged.
 
 ## Custom Resource Definition
 

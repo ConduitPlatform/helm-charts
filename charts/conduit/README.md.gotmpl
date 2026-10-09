@@ -132,7 +132,7 @@ global:
 
 ## Label stability
 
-`helm.sh/chart` and `app.kubernetes.io/version` are set on resource metadata only. Pod templates use `conduit-helm.podLabels` (selector labels, component `app`, and values `podLabels`).
+`helm.sh/chart` and `app.kubernetes.io/version` are omitted from common resource labels so chart bumps do not rewrite `metadata.labels`. They are set as annotations on Deployment, Service, and ServiceMonitor object metadata. Pod templates use `conduit-helm.podLabels` (selector labels, component `app`, and values `podLabels`). Selectors are unchanged.
 
 ## Custom Resource Definition
 

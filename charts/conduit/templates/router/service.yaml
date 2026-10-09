@@ -15,6 +15,7 @@ metadata:
     {{- toYaml .Values.router.service.labels | nindent 4 }}
   {{- end }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- if and .Values.router.metrics.enabled .Values.prometheus.setup (not .Values.global.enableServiceMonitors) (not .Values.router.metrics.serviceMonitor.enabled) }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ default $moduleSettings.metrics.service.port .Values.router.metrics.service.port }}"

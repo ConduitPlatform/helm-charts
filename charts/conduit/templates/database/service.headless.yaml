@@ -10,6 +10,7 @@ metadata:
     {{- toYaml .Values.database.service.labels | nindent 4 }}
   {{- end }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- if .Values.database.service.annotations }}
     {{- toYaml .Values.database.service.annotations | nindent 4 }}
     {{- end }}

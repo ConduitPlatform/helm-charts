@@ -5,6 +5,7 @@ metadata:
   name: {{ template "conduit-helm.router.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
     {{- with .Values.router.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}

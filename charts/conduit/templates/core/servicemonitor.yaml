@@ -9,6 +9,8 @@ metadata:
   {{- if .Values.core.metrics.serviceMonitor.namespace }}
   namespace: {{ .Values.core.metrics.serviceMonitor.namespace }}
   {{- end }}
+  annotations:
+{{ include "conduit-helm.chartAnnotations" . | indent 4 }}
   labels:
 {{ include "conduit-helm.labels" . | indent 4 }}
     app: {{ $coreName }}
